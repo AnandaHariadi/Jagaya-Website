@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Custom fonts and utility classes for JAGAYA can be added here */
+body {
+    @apply bg-slate-50 text-slate-800 antialiased font-sans;
+}

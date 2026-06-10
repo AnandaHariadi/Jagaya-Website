@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JAGAYA - Monitoring Bencana Banjir Demak</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>JAGAYA</h2>
+                <p>Banjir Demak</p>
+            </div>
+            <ul class="menu">
+                <li class="menu-item active" data-page="dashboard">📊 Dashboard</li>
+                <li class="menu-item" data-page="relawan">👥 Relawan</li>
+                <li class="menu-item" data-page="pengungsian">🏠 Titik Pengungsian</li>
+                <li class="menu-item" data-page="donatur">📦 Logistik & Donatur</li>
+                <li class="menu-item" data-page="distribusi">🚚 Distribusi Bantuan</li>
+                <li class="menu-item" data-page="log">📋 Log Aktivitas</li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main">
+            <header class="header">
+                <h1>Tanggap Darurat Banjir Demak</h1>
+            </header>
+
+            <!-- Page Content -->
+            <div id="page-content">
+                <!-- Dashboard -->
+                <div id="dashboard" class="page active">
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-icon">👥</div>
+                            <div class="kpi-number" id="kpi-relawan">0</div>
+                            <div class="kpi-label">Relawan Aktif</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon">🏠</div>
+                            <div class="kpi-number" id="kpi-pengungsian">0</div>
+                            <div class="kpi-label">Titik Pengungsian</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon">💰</div>
+                            <div class="kpi-number" id="kpi-donatur">0</div>
+                            <div class="kpi-label">Donatur</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon">📦</div>
+                            <div class="kpi-number" id="kpi-bantuan">0</div>
+                            <div class="kpi-label">Bantuan Terkirim</div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <h3>📊 Analisis Situasi</h3>
+                            <div class="stats">
+                                <div class="stat">
+                                    <span class="stat-label">Kecamatan Terdampak</span>
+                                    <span class="stat-value">14</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Desa Terdampak</span>
+                                    <span class="stat-value">89</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Luas Genangan</span>
+                                    <span class="stat-value">1,247 Ha</span>
+                                </div>
+                            </div>
+                            <button id="generate-narasi" class="btn-primary">Generate Narasi AI</button>
+                            <div id="narasi-output" class="narasi" style="display:none;"></div>
+                        </div>
+
+                        <div class="card">
+                            <h3>🏠 Kapasitas Pengungsian</h3>
+                            <div class="capacity-total">
+                                <div class="capacity-label">Total: <span id="capacity-total">0 / 0</span></div>
+                                <div class="progress">
+                                    <div class="progress-bar" id="capacity-progress"></div>
+                                </div>
+                                <div class="capacity-percent" id="capacity-percent">0%</div>
+                            </div>
+                            <div class="capacity-list">
+                                <!-- Demo locations will be populated -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card full-width">
+                        <h3>🗺️ Peta Lokasi Demak</h3>
+                        <iframe class="map" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15872.523322234995!2d110.63685700165111!3d-6.89080453206301!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e70ebe094d9814f%3A0x830a53c709938c5a!2sDemak%2C%20Kec.%20Demak%2C%20Kabupaten%20Demak%2C%20Jawa%20Tengah!5e1!3m2!1sid!2sid!4v1723803888200!5m2!1sid!2sid" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                </div>
+
+                <!-- Relawan -->
+                <div id="relawan" class="page">
+                    <div class="card">
+                        <h2>👥 Kelola Relawan</h2>
+                        <form id="relawan-form">
+                            <div class="form-grid">
+                                <input id="relawan-nama" placeholder="Nama Lengkap" required>
+                                <input id="relawan-umur" type="number" placeholder="Umur" required>
+                                <input id="relawan-alamat" placeholder="Alamat" required>
+                                <input id="relawan-hp" type="tel" placeholder="No. HP" required>
+                            </div>
+                            <button type="submit" class="btn-primary">Tambah Relawan</button>
+                            <button type="button" id="relawan-cancel" class="btn-secondary" style="display:none">Batal Edit</button>
+                        </form>
+                        <table id="relawan-table">
+                            <thead>
+                                <tr><th>ID</th><th>Nama</th><th>Umur</th><th>Alamat</th><th>HP</th><th>Aksi</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pengungsian -->
+                <div id="pengungsian" class="page">
+                    <div class="card">
+                        <h2>🏠 Titik Pengungsian</h2>
+                        <form id="pengungsian-form">
+                            <div class="form-grid">
+                                <input id="pengungsian-nama" placeholder="Nama Lokasi" required>
+                                <input id="pengungsian-max" type="number" placeholder="Kapasitas Maks" required>
+                                <input id="pengungsian-current" type="number" placeholder="Saat ini" required>
+                            </div>
+                            <button type="submit" class="btn-primary">Tambah Lokasi</button>
+                            <button type="button" id="pengungsian-cancel" class="btn-secondary" style="display:none">Batal Edit</button>
+                        </form>
+                        <table id="pengungsian-table">
+                            <thead>
+                                <tr><th>ID</th><th>Lokasi</th><th>Max</th><th>Saat Ini</th><th>%</th><th>Aksi</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Donatur -->
+                <div id="donatur" class="page">
+                    <div class="card">
+                        <h2>📦 Logistik & Donatur</h2>
+                        <form id="donatur-form">
+                            <div class="form-grid">
+                                <input id="donatur-nama" placeholder="Nama Donatur" required>
+                                <input id="donatur-jenis" placeholder="Jenis Bantuan" required>
+                                <input id="donatur-jumlah" type="number" placeholder="Jumlah" required>
+                            </div>
+                            <button type="submit" class="btn-primary">Tambah Donasi</button>
+                        </form>
+                        <table id="donatur-table">
+                            <thead>
+                                <tr><th>ID</th><th>Donatur</th><th>Jenis</th><th>Jumlah</th><th>Tanggal</th><th>Aksi</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Distribusi -->
+                <div id="distribusi" class="page">
+                    <div class="card">
+                        <h2>🚚 Distribusi Bantuan</h2>
+                        <form id="distribusi-form">
+                            <div class="form-grid">
+                                <input id="distribusi-lokasi" placeholder="Lokasi Tujuan" required>
+                                <input id="distribusi-jenis" placeholder="Jenis Bantuan" required>
+                                <input id="distribusi-jumlah" type="number" placeholder="Jumlah" required>
+                                <select id="distribusi-status" required>
+                                    <option value="">Pilih Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="dikirim">Dikirim</option>
+                                    <option value="selesai">Selesai</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary">Tambah Distribusi</button>
+                            <button type="button" id="distribusi-cancel" class="btn-secondary" style="display:none">Batal Edit</button>
+                        </form>
+                        <table id="distribusi-table">
+                            <thead>
+                                <tr><th>ID</th><th>Lokasi</th><th>Jenis</th><th>Jumlah</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Log -->
+                <div id="log" class="page">
+                    <div class="card">
+                        <h2>📋 Log Aktivitas</h2>
+                        <button id="clear-log" class="btn-danger">Hapus Semua Log</button>
+                        <table id="log-table">
+                            <thead>
+                                <tr><th>ID</th><th>Aksi</th><th>Detail</th><th>Waktu</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+
