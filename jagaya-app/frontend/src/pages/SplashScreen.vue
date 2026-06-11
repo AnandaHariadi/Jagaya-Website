@@ -37,9 +37,9 @@ onMounted(() => {
       
       <!-- Elegant Logo Animation -->
       <div class="relative mb-6">
-        <div class="absolute inset-0 bg-gradient-to-tr from-orange-500 to-red-600 rounded-2xl blur-lg opacity-30 animate-pulse"></div>
-        <div class="w-20 h-20 bg-white rounded-2xl shadow-[0_10px_30px_rgba(249,115,22,0.15)] flex items-center justify-center relative z-10 border border-gray-50">
-          <img :src="logoImg" alt="JAGAYA" class="w-14 h-14 object-contain" />
+        <div class="absolute inset-0 bg-gradient-to-tr from-orange-500 to-red-600 rounded-full blur-2xl opacity-40 animate-pulse"></div>
+        <div class="relative z-10 flex items-center justify-center">
+          <img :src="logoImg" alt="JAGAYA" class="w-28 h-28 object-contain drop-shadow-xl hover:scale-105 transition-transform" />
         </div>
       </div>
 

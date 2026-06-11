@@ -122,10 +122,11 @@ const values = [
   { icon: GlobeAltIcon, title: 'Inklusif', desc: 'Mudah digunakan oleh semua kalangan dan segala usia.' },
 ]
 const milestones = [
-  { year: '2023', title: 'Inisiasi JAGAYA', desc: 'Lahir dari kebutuhan koordinasi bencana banjir Demak yang lebih terstruktur.' },
-  { year: '2024', title: 'Integrasi Sensor IoT', desc: 'Pemasangan jaringan sensor ketinggian air di 24 titik rawan.' },
-  { year: '2025', title: 'Sinkronisasi BNPB', desc: 'Sistem tersambung penuh dengan database pusat BNPB & BPBD Jateng.' },
-  { year: '2026', title: 'Platform Terpadu', desc: 'Dashboard, donasi transparan, forum aspirasi, dan logistik dalam satu sistem.' },
+  { year: '2026', title: 'Peluncuran Platform', desc: 'Peluncuran resmi JAGAYA sebagai platform tanggap bencana digital terpadu untuk Kabupaten Demak.', icon: BoltIcon },
+  { year: '2027', title: 'Integrasi Sensor IoT', desc: 'Pemasangan 50+ sensor ketinggian air real-time di titik rawan dan integrasi data satelit.', icon: SignalIcon },
+  { year: '2028', title: 'AI Prediksi Bencana', desc: 'Implementasi model AI untuk prediksi banjir 72 jam sebelum kejadian dengan akurasi 95%.', icon: CpuChipIcon },
+  { year: '2029', title: 'Ekspansi Nasional', desc: 'Perluasan layanan ke 10 kabupaten rawan bencana di Jawa Tengah dan Jawa Timur.', icon: GlobeAltIcon },
+  { year: '2030', title: 'Ekosistem Penuh', desc: 'Ekosistem kebencanaan nasional: drone rescue, digital twin kota, dan pusat komando terpadu.', icon: ShieldCheckIcon },
 ]
 
 /* ── LIVE MAP · KONDISI TERKINI DEMAK ───────────── */
@@ -181,21 +182,76 @@ const showFounderModal = ref(false)
 
       <!-- Mascot Animation -->
       <div class="absolute right-0 top-1/2 z-20" style="animation: mascotPop 8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;">
-        <div class="relative w-32 h-32 md:w-48 md:h-48 drop-shadow-[0_20px_30px_rgba(249,115,22,0.3)]" style="animation: float 3s ease-in-out infinite;">
-          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
-            <circle cx="100" cy="100" r="60" fill="white" stroke="#f97316" stroke-width="8"/>
-            <!-- Eyes -->
-            <rect x="75" y="85" width="12" height="20" rx="6" fill="#ef4444"/>
-            <rect x="113" y="85" width="12" height="20" rx="6" fill="#ef4444"/>
-            <!-- Smile -->
-            <path d="M75 125 Q100 145 125 125" stroke="#f97316" stroke-width="8" stroke-linecap="round"/>
+        <div class="relative w-40 h-56 md:w-64 md:h-[350px] drop-shadow-[0_20px_30px_rgba(249,115,22,0.3)]" style="animation: float 4s ease-in-out infinite;">
+          <svg viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-[0_20px_30px_rgba(249,115,22,0.2)]">
+            <defs>
+              <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#f97316" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+
+            <!-- Background Glow -->
+            <circle cx="150" cy="180" r="140" fill="url(#glow)" />
+
+            <!-- Thruster Flames (Animated) -->
+            <g class="thruster-flames">
+              <path d="M125 320 Q 150 380 175 320 Z" fill="#ef4444" />
+              <path d="M135 320 Q 150 360 165 320 Z" fill="#facc15" />
+            </g>
+
+            <!-- Left Arm -->
+            <path d="M95 210 Q 40 220 55 270" stroke="#cbd5e1" stroke-width="14" stroke-linecap="round" fill="none" />
+            <circle cx="55" cy="270" r="14" fill="white" stroke="#f97316" stroke-width="6"/>
+
+            <!-- Right Arm (Waving) -->
+            <g class="robot-arm-wave" style="transform-origin: 205px 210px;">
+              <path d="M205 210 Q 260 190 260 140" stroke="#cbd5e1" stroke-width="14" stroke-linecap="round" fill="none" />
+              <circle cx="260" cy="140" r="14" fill="white" stroke="#f97316" stroke-width="6"/>
+            </g>
+
+            <!-- Body -->
+            <path d="M100 170 L200 170 Q210 170 210 180 L195 310 Q193 320 183 320 L117 320 Q107 320 105 310 L90 180 Q90 170 100 170 Z" fill="white" stroke="#f97316" stroke-width="8"/>
+            
+            <!-- Body Screen -->
+            <rect x="120" y="195" width="60" height="45" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="4"/>
+            <!-- Heart on screen -->
+            <path d="M150 212 C150 212 145 208 140 208 C135 208 131 212 131 217 C131 224 150 233 150 233 C150 233 169 224 169 217 C169 212 165 208 160 208 C155 208 150 212 150 212 Z" fill="#ef4444" class="animate-pulse" />
+            
+            <!-- Core/Belt -->
+            <rect x="125" y="260" width="50" height="15" rx="7.5" fill="#f97316"/>
+            <circle cx="135" cy="267.5" r="4" fill="white"/>
+            <circle cx="150" cy="267.5" r="4" fill="white"/>
+            <circle cx="165" cy="267.5" r="4" fill="white"/>
+
+            <!-- Neck -->
+            <rect x="140" y="150" width="20" height="25" fill="#cbd5e1" />
+
+            <!-- Head -->
+            <rect x="85" y="60" width="130" height="95" rx="35" fill="white" stroke="#f97316" stroke-width="8"/>
+            
+            <!-- Face Screen -->
+            <rect x="100" y="75" width="100" height="65" rx="20" fill="#0f172a" />
+            
+            <!-- Eyes (Happy Curve) -->
+            <path d="M120 110 Q 130 95 140 110" stroke="#38bdf8" stroke-width="7" stroke-linecap="round" fill="none" />
+            <path d="M160 110 Q 170 95 180 110" stroke="#38bdf8" stroke-width="7" stroke-linecap="round" fill="none" />
+            
+            <!-- Cheeks -->
+            <circle cx="115" cy="120" r="6" fill="#ef4444" opacity="0.6"/>
+            <circle cx="185" cy="120" r="6" fill="#ef4444" opacity="0.6"/>
+
+            <!-- Ear/Side Nodes -->
+            <rect x="75" y="90" width="10" height="35" rx="5" fill="#f97316"/>
+            <rect x="215" y="90" width="10" height="35" rx="5" fill="#f97316"/>
+
             <!-- Antenna -->
-            <line x1="100" y1="40" x2="100" y2="15" stroke="#f97316" stroke-width="8" stroke-linecap="round"/>
-            <circle cx="100" cy="15" r="8" fill="#ef4444" class="animate-ping" style="transform-origin: 100px 15px; animation-duration: 1s;"/>
-            <circle cx="100" cy="15" r="8" fill="#ef4444"/>
-            <!-- Wings / Propellers -->
-            <path d="M40 100 Q15 90 25 70 Q45 80 40 100" fill="#f97316"/>
-            <path d="M160 100 Q185 90 175 70 Q155 80 160 100" fill="#f97316"/>
+            <line x1="150" y1="60" x2="150" y2="25" stroke="#f97316" stroke-width="8" stroke-linecap="round"/>
+            <!-- Blinking Red Light -->
+            <circle cx="150" cy="20" r="12" fill="#ef4444" class="animate-ping" style="transform-origin: 150px 20px; animation-duration: 2s;"/>
+            <circle cx="150" cy="20" r="12" fill="#ef4444"/>
+            <circle cx="153" cy="17" r="4" fill="white" opacity="0.7"/>
+
           </svg>
         </div>
       </div>
@@ -250,7 +306,7 @@ const showFounderModal = ref(false)
         <!-- header -->
         <div class="max-w-3xl mx-auto mb-16 text-center reveal">
           <div class="flex items-center justify-center gap-3 text-orange-600 font-bold tracking-[0.25em] text-xs uppercase mb-5">
-            <span class="w-10 h-px bg-orange-500"></span> Tentang Kami <span class="w-10 h-px bg-orange-500"></span>
+            Tentang Kami
           </div>
           <h2 class="text-4xl lg:text-6xl font-black text-slate-900 leading-[1.05] tracking-tight">
             Lebih dekat dengan orang<br class="hidden sm:block"> di balik <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">JAGAYA</span>.
@@ -285,12 +341,12 @@ const showFounderModal = ref(false)
           </div>
 
           <!-- dark mission card -->
-          <div class="lg:col-span-4 relative rounded-[28px] bg-slate-950 p-8 overflow-hidden text-white flex flex-col justify-between min-h-[210px]">
-            <div class="absolute -bottom-12 -right-12 w-44 h-44 rounded-full bg-orange-600/20 blur-2xl"></div>
-            <ShieldCheckIcon class="w-9 h-9 text-orange-400 relative"/>
+          <div class="lg:col-span-4 relative rounded-[28px] bg-gradient-to-br from-orange-500 to-red-600 p-8 overflow-hidden text-white flex flex-col justify-between min-h-[210px]">
+            <div class="absolute -bottom-12 -right-12 w-44 h-44 rounded-full bg-white/20 blur-2xl"></div>
+            <ShieldCheckIcon class="w-9 h-9 text-white/80 relative"/>
             <div class="relative">
-              <p class="text-[11px] font-black uppercase tracking-widest text-gray-500 mb-2">Misi Kami</p>
-              <p class="text-[15px] font-semibold leading-relaxed text-gray-100">Menjadi tulang punggung digital penanggulangan bencana yang menyelamatkan lebih banyak nyawa.</p>
+              <p class="text-[11px] font-black uppercase tracking-widest text-white/70 mb-2">Misi Kami</p>
+              <p class="text-[15px] font-semibold leading-relaxed text-white">Menjadi tulang punggung digital penanggulangan bencana yang menyelamatkan lebih banyak nyawa.</p>
             </div>
           </div>
 
@@ -353,7 +409,7 @@ const showFounderModal = ref(false)
           </div>
           <div>
             <div class="flex items-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
-              <span class="w-8 h-0.5 bg-orange-500"></span> Visi & Misi
+              Visi & Misi
             </div>
             <h2 class="text-4xl font-bold text-slate-900 mb-5">Arah & Tujuan Kami</h2>
             <div class="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-r-xl mb-8">
@@ -373,50 +429,110 @@ const showFounderModal = ref(false)
     </section>
 
     <!-- 2d. NILAI PERUSAHAAN -->
-    <section class="py-24 bg-slate-900 relative overflow-hidden reveal">
-      <div class="absolute inset-0 opacity-[0.04]" style="background-image:radial-gradient(circle at 1px 1px, white 1px, transparent 0);background-size:26px 26px"></div>
+    <section class="py-24 bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 relative overflow-hidden reveal">
+      <div class="absolute inset-0 opacity-[0.08]" style="background-image:radial-gradient(circle at 1px 1px, white 1px, transparent 0);background-size:26px 26px"></div>
       <div class="container max-w-7xl mx-auto px-6 relative">
         <div class="text-center max-w-2xl mx-auto mb-16">
           <div class="inline-flex items-center justify-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
-            <span class="w-8 h-0.5 bg-orange-500"></span> Nilai Perusahaan <span class="w-8 h-0.5 bg-orange-500"></span>
+            Nilai Perusahaan
           </div>
           <h2 class="text-4xl font-bold text-white">Prinsip yang Kami Pegang</h2>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div v-for="(v, i) in values" :key="i" class="bg-white/5 border border-white/10 rounded-2xl p-7 hover:bg-white/10 hover:-translate-y-1 transition-all">
-            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mb-5 shadow-lg shadow-orange-500/20">
+          <div v-for="(v, i) in values" :key="i" class="bg-white/15 border border-white/20 rounded-2xl p-7 hover:bg-white/25 hover:-translate-y-1 transition-all backdrop-blur-sm">
+            <div class="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center mb-5 shadow-lg shadow-black/10">
               <component :is="v.icon" class="w-7 h-7 text-white" />
             </div>
             <h3 class="text-xl font-bold text-white mb-2">{{ v.title }}</h3>
-            <p class="text-gray-400 text-sm leading-relaxed">{{ v.desc }}</p>
+            <p class="text-white/80 text-sm leading-relaxed">{{ v.desc }}</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 2e. MILESTONE TIMELINE -->
-    <section class="py-24 bg-white reveal">
-      <div class="container max-w-5xl mx-auto px-6">
-        <div class="text-center max-w-2xl mx-auto mb-16">
+    <!-- 2e. MILESTONE TIMELINE — Premium Roadmap (Light Theme) -->
+    <section class="py-28 bg-gradient-to-b from-white via-orange-50/50 to-white relative overflow-hidden reveal">
+      <!-- Ambient glow effects -->
+      <div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-[120px]"></div>
+      <div class="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-red-500/10 rounded-full blur-[120px]"></div>
+      <div class="absolute inset-0 opacity-[0.03]" style="background-image:radial-gradient(circle at 1px 1px, #f97316 1px, transparent 0);background-size:32px 32px"></div>
+
+      <div class="container max-w-7xl mx-auto px-6 relative z-10">
+        <!-- Header -->
+        <div class="text-center max-w-2xl mx-auto mb-20">
           <div class="inline-flex items-center justify-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
-            <span class="w-8 h-0.5 bg-orange-500"></span> Perjalanan Kami <span class="w-8 h-0.5 bg-orange-500"></span>
+            Roadmap 2026 — 2030
           </div>
-          <h2 class="text-4xl font-bold text-slate-900">Jejak Langkah JAGAYA</h2>
+          <h2 class="text-4xl lg:text-5xl font-black text-slate-900 leading-tight">
+            Jejak Langkah <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">JAGAYA</span>
+          </h2>
+          <p class="text-gray-500 mt-4 text-sm leading-relaxed max-w-lg mx-auto">
+            Lima tahun transformasi digital penanggulangan bencana — dari peluncuran platform hingga ekosistem nasional.
+          </p>
         </div>
-        <div class="relative">
-          <div class="absolute left-[27px] md:left-1/2 top-0 bottom-0 w-0.5 bg-orange-100 md:-translate-x-1/2"></div>
-          <div class="space-y-10">
+
+        <!-- Horizontal Timeline (Desktop) -->
+        <div class="hidden lg:block relative">
+          <!-- Animated gradient line -->
+          <div class="absolute top-[72px] left-0 right-0 h-[3px]">
+            <div class="w-full h-full bg-gradient-to-r from-transparent via-orange-200 to-transparent rounded-full"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 rounded-full timeline-glow-line"></div>
+          </div>
+
+          <div class="grid grid-cols-5 gap-6 relative">
             <div v-for="(ms, i) in milestones" :key="i"
-              class="relative flex items-start gap-6 md:gap-0"
-              :class="i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'">
-              <div class="hidden md:block md:w-1/2"></div>
-              <div class="absolute left-0 md:left-1/2 md:-translate-x-1/2 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-red-600 text-white flex items-center justify-center font-black text-sm shadow-lg shadow-orange-500/30 z-10 shrink-0">
+              class="group relative flex flex-col items-center text-center"
+              :style="{ animationDelay: i * 150 + 'ms' }">
+
+              <!-- Glowing dot -->
+              <div class="relative z-20 mb-8">
+                <div class="absolute -inset-3 rounded-full bg-gradient-to-br from-orange-500 to-red-600 opacity-0 group-hover:opacity-30 blur-xl transition-all duration-700"></div>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-500/30 ring-4 ring-white group-hover:scale-125 transition-transform duration-500 relative">
+                  <div class="w-3 h-3 rounded-full bg-white"></div>
+                </div>
+                <!-- Connecting pulse -->
+                <div class="absolute inset-0 rounded-full bg-orange-500/40 animate-ping" style="animation-duration: 3s;" :style="{ animationDelay: i * 600 + 'ms' }"></div>
+              </div>
+
+              <!-- Year badge -->
+              <div class="inline-flex px-4 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-white text-sm font-black shadow-lg shadow-orange-500/20 mb-5 group-hover:shadow-orange-500/40 group-hover:scale-110 transition-all duration-500">
                 {{ ms.year }}
               </div>
-              <div class="flex-1 md:w-1/2 ml-20 md:ml-0 bg-slate-50 border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-shadow"
-                :class="i % 2 === 0 ? 'md:mr-12' : 'md:ml-12'">
-                <h3 class="text-lg font-black text-slate-900 mb-1">{{ ms.title }}</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">{{ ms.desc }}</p>
+
+              <!-- Card -->
+              <div class="bg-white border border-gray-100 rounded-2xl p-6 hover:border-orange-500/30 hover:-translate-y-2 transition-all duration-500 w-full shadow-sm group-hover:shadow-2xl group-hover:shadow-orange-500/15">
+                <div class="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center mb-4 mx-auto group-hover:bg-orange-100 transition-colors">
+                  <component :is="ms.icon" class="w-6 h-6 text-orange-500" />
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-2 leading-tight">{{ ms.title }}</h3>
+                <p class="text-gray-500 text-xs leading-relaxed">{{ ms.desc }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vertical Timeline (Mobile) -->
+        <div class="lg:hidden relative pl-8">
+          <!-- Vertical gradient line -->
+          <div class="absolute left-[15px] top-0 bottom-0 w-[3px] bg-gradient-to-b from-orange-500 via-red-500 to-orange-500/30 rounded-full"></div>
+
+          <div class="space-y-10">
+            <div v-for="(ms, i) in milestones" :key="i" class="relative group">
+              <!-- Dot -->
+              <div class="absolute -left-[17.5px] top-1 w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-500/30 ring-4 ring-white z-10">
+                <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
+              </div>
+
+              <!-- Card -->
+              <div class="bg-white border border-gray-100 rounded-2xl p-6 hover:border-orange-500/30 transition-all duration-500 ml-6 shadow-sm hover:shadow-xl hover:shadow-orange-500/10">
+                <div class="flex items-center gap-3 mb-3">
+                  <span class="px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-white text-xs font-black shadow-lg shadow-orange-500/20">{{ ms.year }}</span>
+                  <div class="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center">
+                    <component :is="ms.icon" class="w-5 h-5 text-orange-500" />
+                  </div>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-1">{{ ms.title }}</h3>
+                <p class="text-gray-500 text-xs leading-relaxed">{{ ms.desc }}</p>
               </div>
             </div>
           </div>
@@ -429,7 +545,7 @@ const showFounderModal = ref(false)
       <div class="container max-w-7xl mx-auto px-6">
         <div class="text-center max-w-2xl mx-auto mb-16 reveal">
           <div class="flex items-center justify-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
-            <span class="w-8 h-0.5 bg-orange-500"></span> Layanan Kami <span class="w-8 h-0.5 bg-orange-500"></span>
+            Layanan Kami
           </div>
           <h2 class="text-4xl font-bold text-slate-900">Layanan Tanggap Darurat Terpercaya</h2>
         </div>
@@ -487,7 +603,7 @@ const showFounderModal = ref(false)
         <div class="grid lg:grid-cols-2 gap-16 items-center">
           <div class="reveal">
             <div class="flex items-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
-              <span class="w-8 h-0.5 bg-orange-500"></span> Keahlian Utama
+              Keahlian Utama
             </div>
             <h2 class="text-4xl font-bold text-slate-900 mb-6">
               Sistem Yang Menjaga<br>Keselamatan Tetap Berjalan.
@@ -545,7 +661,7 @@ const showFounderModal = ref(false)
       <div class="container max-w-7xl mx-auto px-6">
         <div class="text-center max-w-2xl mx-auto mb-20 reveal">
           <div class="flex items-center justify-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
-            <span class="w-8 h-0.5 bg-orange-500"></span> Proses Kerja <span class="w-8 h-0.5 bg-orange-500"></span>
+            Proses Kerja
           </div>
           <h2 class="text-4xl font-bold text-slate-900">Alur Manajemen Bencana Mulus</h2>
         </div>
@@ -593,7 +709,7 @@ const showFounderModal = ref(false)
       <div class="container max-w-7xl mx-auto px-6">
         <div class="text-center max-w-2xl mx-auto mb-16 reveal">
           <div class="flex items-center justify-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
-            <span class="w-8 h-0.5 bg-orange-500"></span> Prestasi & Apresiasi <span class="w-8 h-0.5 bg-orange-500"></span>
+            Prestasi & Apresiasi
           </div>
           <h2 class="text-4xl font-bold text-slate-900">Jejak Langkah & Penghargaan</h2>
           <p class="mt-4 text-gray-500 text-sm">Dedikasi dan inovasi berkelanjutan dalam memimpin transformasi sistem tanggap darurat nasional bersama para pemimpin negeri.</p>
@@ -651,7 +767,7 @@ const showFounderModal = ref(false)
         <div class="grid lg:grid-cols-2 gap-16 items-start">
           <div class="reveal">
             <div class="flex items-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
-              <span class="w-8 h-0.5 bg-orange-500"></span> FAQ
+              FAQ
             </div>
             <h2 class="text-4xl font-bold text-slate-900 mb-8">Pertanyaan Umum</h2>
             
@@ -807,6 +923,16 @@ const showFounderModal = ref(false)
   100% { transform: translateX(calc(-50% - 12px)); } /* 50% width + half gap */
 }
 
+/* Timeline Glow Line */
+.timeline-glow-line {
+  animation: timelineGlow 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.5));
+}
+@keyframes timelineGlow {
+  0%, 100% { opacity: 0.4; filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.3)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 16px rgba(249, 115, 22, 0.7)); }
+}
+
 /* Service tab fade */
 .dev-fade-enter-active,.dev-fade-leave-active{transition:all .3s cubic-bezier(.16,1,.3,1)}
 .dev-fade-enter-from{opacity:0;transform:translateY(12px)}
@@ -819,13 +945,35 @@ const showFounderModal = ref(false)
 
 /* Mascot Animations */
 @keyframes mascotPop {
-  0%, 10% { transform: translateX(150%) translateY(-50%); }
-  25%, 75% { transform: translateX(-10%) translateY(-50%); }
-  90%, 100% { transform: translateX(150%) translateY(-50%); }
+  0%, 10% { transform: translateX(150%) translateY(-65%); }
+  25%, 75% { transform: translateX(-35%) translateY(-65%); }
+  90%, 100% { transform: translateX(150%) translateY(-65%); }
 }
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-15px); }
+}
+
+/* Robot Animations */
+.robot-arm-wave {
+  animation: robotWave 2s ease-in-out infinite;
+}
+@keyframes robotWave {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(35deg); }
+  30% { transform: rotate(-15deg); }
+  45% { transform: rotate(25deg); }
+  60% { transform: rotate(-10deg); }
+  75% { transform: rotate(15deg); }
+  90% { transform: rotate(0deg); }
+}
+.thruster-flames {
+  animation: thrust 0.5s ease-in-out infinite alternate;
+  transform-origin: 150px 320px;
+}
+@keyframes thrust {
+  from { transform: scaleY(1); opacity: 0.8; }
+  to { transform: scaleY(1.4); opacity: 1; filter: drop-shadow(0 10px 10px rgba(239,68,68,0.5)); }
 }
 
 /* Lightbox */
