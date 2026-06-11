@@ -1,8 +1,11 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import {
   CheckCircleIcon, ChevronRightIcon, PlayIcon,
-  PhoneIcon, EnvelopeIcon, MapPinIcon, GlobeAltIcon
+  PhoneIcon, EnvelopeIcon, MapPinIcon, GlobeAltIcon,
+  ArrowRightIcon, XMarkIcon, PlusIcon, MinusIcon,
+  BuildingOffice2Icon, UserGroupIcon, GiftIcon, ClockIcon,
+  ShieldCheckIcon
 } from '@heroicons/vue/24/outline'
 
 /* ── Images ──────────────────────────────────────────── */
@@ -58,15 +61,73 @@ const awardsImg = {
 
 
 const faqs = [
-  { q: 'Bagaimana cara JAGAYA memantau banjir?', a: 'Kami menggunakan jaringan sensor IoT dan data satelit real-time.' },
-  { q: 'Apakah sistem ini terintegrasi dengan BNPB?', a: 'Ya, sistem kami telah tersinkronisasi penuh dengan database pusat.' },
-  { q: 'Bagaimana penyaluran donasi dilakukan?', a: 'Setiap rupiah tercatat dalam live-ledger yang dapat diakses publik.' },
-  { q: 'Siapa saja yang bisa menjadi relawan?', a: 'Seluruh warga Indonesia yang telah lolos verifikasi dasar kami.' }
+  { q: 'Bagaimana cara JAGAYA memantau banjir?', a: 'Kami menggunakan jaringan sensor IoT dan data satelit real-time yang tersebar di titik-titik rawan, dipadukan dengan laporan warga yang terverifikasi.' },
+  { q: 'Apakah sistem ini terintegrasi dengan BNPB?', a: 'Ya, sistem kami telah tersinkronisasi penuh dengan database pusat BNPB dan BPBD Jawa Tengah untuk koordinasi lintas lembaga.' },
+  { q: 'Bagaimana penyaluran donasi dilakukan?', a: 'Setiap rupiah tercatat dalam live-ledger yang dapat diakses publik, sehingga Anda dapat melacak ke mana bantuan disalurkan secara transparan.' },
+  { q: 'Siapa saja yang bisa menjadi relawan?', a: 'Seluruh warga Indonesia yang telah lolos verifikasi dasar kami dapat bergabung, baik untuk evakuasi, medis, maupun logistik.' }
+]
+
+/* ── FAQ ACCORDION ──────────────────────────────── */
+const openFaq = ref(0)
+const toggleFaq = (i) => { openFaq.value = openFaq.value === i ? null : i }
+
+/* ── LIGHTBOX PENGHARGAAN ───────────────────────── */
+const lightboxImg = ref(null)
+const lightboxTitle = ref('')
+const openLightbox = (img, title) => { lightboxImg.value = img; lightboxTitle.value = title }
+const closeLightbox = () => { lightboxImg.value = null }
+
+/* ── TAB LAYANAN INTERAKTIF ─────────────────────── */
+const activeService = ref(0)
+
+/* ── COUNTER STATISTIK ──────────────────────────── */
+const stats = ref([
+  { key: 'kecamatan', label: 'Kecamatan Tercakup', target: 14,   suffix: '',  icon: BuildingOffice2Icon, val: 0 },
+  { key: 'relawan',   label: 'Relawan Aktif',       target: 1200, suffix: '+', icon: UserGroupIcon,       val: 0 },
+  { key: 'bantuan',   label: 'Paket Bantuan',       target: 8452, suffix: '+', icon: GiftIcon,            val: 0 },
+  { key: 'tahun',     label: 'Tahun Pengalaman',    target: 5,    suffix: '+', icon: ClockIcon,           val: 0 },
+])
+let countersStarted = false
+const animateCounters = () => {
+  if (countersStarted) return
+  countersStarted = true
+  stats.value.forEach(s => {
+    let c = 0; const step = s.target / 80
+    const timer = setInterval(() => {
+      c = Math.min(c + step, s.target)
+      s.val = Math.floor(c)
+      if (c >= s.target) clearInterval(timer)
+    }, 16)
+  })
+}
+
+/* ── COMPANY PROFILE DATA ───────────────────────── */
+const misi = [
+  'Menyediakan data lapangan real-time untuk pengambilan keputusan darurat yang cepat dan akurat.',
+  'Menjamin transparansi penuh atas setiap donasi dan distribusi bantuan kepada publik.',
+  'Memberdayakan relawan dan masyarakat melalui koordinasi satu pintu yang efisien.',
+]
+const values = [
+  { icon: BuildingOffice2Icon, title: 'Tanggap', desc: 'Respons cepat di setiap detik krisis, 24 jam tanpa henti.' },
+  { icon: CheckCircleIcon, title: 'Transparan', desc: 'Setiap rupiah dan bantuan tercatat serta dapat diaudit publik.' },
+  { icon: UserGroupIcon, title: 'Kolaboratif', desc: 'Menyatukan pemerintah, relawan, dan warga dalam satu ekosistem.' },
+  { icon: GlobeAltIcon, title: 'Inklusif', desc: 'Mudah digunakan oleh semua kalangan dan segala usia.' },
+]
+const milestones = [
+  { year: '2023', title: 'Inisiasi JAGAYA', desc: 'Lahir dari kebutuhan koordinasi bencana banjir Demak yang lebih terstruktur.' },
+  { year: '2024', title: 'Integrasi Sensor IoT', desc: 'Pemasangan jaringan sensor ketinggian air di 24 titik rawan.' },
+  { year: '2025', title: 'Sinkronisasi BNPB', desc: 'Sistem tersambung penuh dengan database pusat BNPB & BPBD Jateng.' },
+  { year: '2026', title: 'Platform Terpadu', desc: 'Dashboard, donasi transparan, forum aspirasi, dan logistik dalam satu sistem.' },
 ]
 
 onMounted(() => {
   const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') })
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible')
+        if (e.target.id === 'dev-stats') animateCounters()
+      }
+    })
   }, { threshold: 0.1 })
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el))
 })
@@ -78,31 +139,32 @@ onMounted(() => {
     <!-- 1. HERO SECTION -->
     <section class="hero-section relative h-[85vh] min-h-[600px] flex items-center">
       <div class="absolute inset-0 z-0">
-        <img :src="heroImg" class="w-full h-full object-cover" />
-        <div class="absolute inset-0 bg-slate-900/80"></div>
+        <img :src="heroImg" class="w-full h-full object-cover scale-105" />
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/80 to-orange-900/40"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(249,115,22,0.18),transparent_55%)]"></div>
       </div>
       
       <div class="container relative z-10 max-w-7xl mx-auto px-6 pt-24">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div class="text-white reveal">
-            <div class="flex items-center gap-3 text-blue-600 font-bold tracking-widest text-xs uppercase mb-6">
-              <span class="w-8 h-0.5 bg-blue-600"></span> Delivering Smarter Solutions
+            <div class="flex items-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-6">
+              <span class="w-8 h-0.5 bg-orange-500"></span> Company Profile · JAGAYA
             </div>
             <h1 class="text-5xl lg:text-7xl font-bold leading-[1.1] mb-6">
-              Manajemen Krisis Mudah,<br>Kapanpun Dibutuhkan!
+              Teknologi untuk<br>Kemanusiaan Demak.
             </h1>
             <p class="text-gray-300 text-lg mb-8 max-w-lg">
-              Kami menangani evakuasi, distribusi logistik, dan koordinasi relawan dengan efisiensi tinggi, membuat pemulihan bencana menjadi lebih cepat dan terukur.
+              JAGAYA adalah ekosistem digital tanggap bencana yang menyatukan pemerintah, relawan, dan masyarakat dalam satu komando — cepat, transparan, dan terukur.
             </p>
-            <div class="flex items-center gap-6">
-              <button class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded font-bold transition-colors flex items-center gap-2">
-                Selengkapnya <ChevronRightIcon class="w-5 h-5"/>
-              </button>
+            <div class="flex items-center gap-6 flex-wrap">
+              <a href="#visi-misi" class="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-8 py-4 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-orange-500/30 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-orange-500/40">
+                Kenali Kami <ChevronRightIcon class="w-5 h-5"/>
+              </a>
               <div class="flex items-center gap-4">
                 <div class="flex -space-x-4">
                   <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80" class="w-12 h-12 rounded-full border-2 border-slate-900 object-cover"/>
                   <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80" class="w-12 h-12 rounded-full border-2 border-slate-900 object-cover"/>
-                  <div class="w-12 h-12 rounded-full border-2 border-slate-900 bg-blue-600 flex items-center justify-center text-white font-bold text-xs">4.9★</div>
+                  <div class="w-12 h-12 rounded-full border-2 border-slate-900 bg-orange-500 flex items-center justify-center text-white font-bold text-xs">4.9</div>
                 </div>
                 <div class="text-sm">
                   <p class="font-bold">Dipercaya Oleh</p>
@@ -118,7 +180,7 @@ onMounted(() => {
               <p class="text-gray-300 text-sm mb-6">Pantau pergerakan armada logistik secara real-time dari gudang ke titik pengungsian.</p>
               <div class="bg-white p-2 rounded flex">
                 <input type="text" placeholder="Masukkan ID Resi..." class="flex-1 outline-none px-3 text-sm text-gray-800" />
-                <button class="bg-blue-600 text-white px-6 py-3 rounded text-sm font-bold">Lacak</button>
+                <button class="bg-orange-500 text-white px-6 py-3 rounded text-sm font-bold">Lacak</button>
               </div>
             </div>
           </div>
@@ -131,25 +193,25 @@ onMounted(() => {
       <div class="container max-w-7xl mx-auto px-6">
         <div class="grid lg:grid-cols-2 gap-16 items-center">
           <div class="reveal">
-            <div class="flex items-center gap-3 text-blue-600 font-bold tracking-widest text-xs uppercase mb-4">
-              <span class="w-8 h-0.5 bg-blue-600"></span> Tentang Kami
+            <div class="flex items-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
+              <span class="w-8 h-0.5 bg-orange-500"></span> Tentang Kami
             </div>
             <h2 class="text-4xl lg:text-5xl font-bold text-slate-900 leading-tight mb-6">
-              Didorong oleh Kepercayaan,<br>Ditenagai oleh Inovasi.
+              Didorong oleh Kepercayaan,<br>Ditenagai oleh <span class="bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">Inovasi.</span>
             </h2>
             <p class="text-gray-500 mb-8 leading-relaxed">
               JAGAYA adalah ekosistem digital terpadu yang memadukan keahlian lapangan dan teknologi modern. Kami berdedikasi untuk memberikan ketenangan pikiran melalui sistem penanganan krisis yang transparan.
             </p>
             <div class="grid sm:grid-cols-2 gap-8 mb-8">
               <div class="flex gap-4">
-                <div class="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0"><GlobeAltIcon class="w-6 h-6"/></div>
+                <div class="w-12 h-12 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500 shrink-0"><GlobeAltIcon class="w-6 h-6"/></div>
                 <div>
                   <h4 class="font-bold text-slate-900">Jangkauan Luas</h4>
                   <p class="text-sm text-gray-500 mt-1">Mengcover seluruh 14 kecamatan Demak.</p>
                 </div>
               </div>
               <div class="flex gap-4">
-                <div class="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0"><PhoneIcon class="w-6 h-6"/></div>
+                <div class="w-12 h-12 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500 shrink-0"><PhoneIcon class="w-6 h-6"/></div>
                 <div>
                   <h4 class="font-bold text-slate-900">Dukungan 24/7</h4>
                   <p class="text-sm text-gray-500 mt-1">Tim siaga penuh setiap saat.</p>
@@ -161,22 +223,124 @@ onMounted(() => {
                 Baca Selengkapnya
               </button>
               <div class="flex items-center gap-4">
-                <img :src="fotoImg" class="w-14 h-14 rounded-full object-cover border-2 border-blue-600"/>
+                <img :src="fotoImg" class="w-14 h-14 rounded-full object-cover border-2 border-orange-500"/>
                 <div>
                   <p class="font-bold text-slate-900">M. Ananda Hariadi</p>
-                  <p class="text-sm text-blue-600 font-bold">Founder JAGAYA</p>
+                  <p class="text-sm text-orange-500 font-bold">Founder JAGAYA</p>
                 </div>
               </div>
             </div>
           </div>
           
           <div class="relative reveal" style="transition-delay: 0.2s">
-            <div class="absolute -inset-4 bg-blue-100 rounded-lg transform rotate-3"></div>
+            <div class="absolute -inset-4 bg-orange-100 rounded-lg transform rotate-3"></div>
             <img :src="fotoImg" class="relative w-full h-[600px] object-cover rounded-lg shadow-xl" />
             <div class="absolute top-1/2 -translate-y-1/2 -left-8 w-32 h-32 bg-white rounded-full shadow-2xl flex items-center justify-center border-4 border-white animate-spin-slow">
               <div class="text-center">
-                <p class="text-3xl font-black text-blue-600">5+</p>
+                <p class="text-3xl font-black text-orange-500">5+</p>
                 <p class="text-[10px] font-bold uppercase text-slate-900 tracking-wider">Tahun<br>Pengalaman</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2b. STATS COUNTER STRIP -->
+    <section id="dev-stats" class="py-16 bg-white border-t border-gray-100 reveal">
+      <div class="container max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div v-for="s in stats" :key="s.key" class="flex items-center gap-4 p-6 rounded-xl bg-slate-50 border border-gray-100 hover:border-orange-300 hover:shadow-lg transition-all">
+            <div class="w-14 h-14 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shrink-0">
+              <component :is="s.icon" class="w-7 h-7" />
+            </div>
+            <div>
+              <p class="text-3xl font-black text-slate-900 leading-none tabular-nums">{{ s.val.toLocaleString('id') }}{{ s.suffix }}</p>
+              <p class="text-sm text-gray-500 font-semibold mt-1">{{ s.label }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2c. VISI & MISI -->
+    <section id="visi-misi" class="py-24 bg-white reveal">
+      <div class="container max-w-7xl mx-auto px-6">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
+          <div class="relative">
+            <div class="absolute -inset-4 bg-orange-100 rounded-2xl rotate-2"></div>
+            <img :src="techImg" class="relative w-full h-[420px] object-cover rounded-2xl shadow-xl" />
+            <div class="absolute -bottom-6 -right-6 bg-slate-900 text-white p-6 rounded-2xl shadow-2xl max-w-[200px]">
+              <p class="text-3xl font-black text-orange-500">100%</p>
+              <p class="text-xs font-bold uppercase tracking-wider mt-1">Komitmen untuk Demak</p>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
+              <span class="w-8 h-0.5 bg-orange-500"></span> Visi & Misi
+            </div>
+            <h2 class="text-4xl font-bold text-slate-900 mb-5">Arah & Tujuan Kami</h2>
+            <div class="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-r-xl mb-8">
+              <p class="text-[11px] font-black uppercase tracking-widest text-orange-600 mb-2">Visi</p>
+              <p class="text-lg font-bold text-slate-800 leading-relaxed">Menjadi tulang punggung digital penanggulangan bencana yang menyelamatkan lebih banyak nyawa melalui kecepatan dan transparansi.</p>
+            </div>
+            <p class="text-[11px] font-black uppercase tracking-widest text-orange-600 mb-3">Misi</p>
+            <ul class="space-y-3">
+              <li v-for="(m, i) in misi" :key="i" class="flex items-start gap-3">
+                <CheckCircleIcon class="w-6 h-6 text-orange-500 shrink-0 mt-0.5" />
+                <span class="text-gray-600 leading-relaxed">{{ m }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2d. NILAI PERUSAHAAN -->
+    <section class="py-24 bg-slate-900 relative overflow-hidden reveal">
+      <div class="absolute inset-0 opacity-[0.04]" style="background-image:radial-gradient(circle at 1px 1px, white 1px, transparent 0);background-size:26px 26px"></div>
+      <div class="container max-w-7xl mx-auto px-6 relative">
+        <div class="text-center max-w-2xl mx-auto mb-16">
+          <div class="inline-flex items-center justify-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
+            <span class="w-8 h-0.5 bg-orange-500"></span> Nilai Perusahaan <span class="w-8 h-0.5 bg-orange-500"></span>
+          </div>
+          <h2 class="text-4xl font-bold text-white">Prinsip yang Kami Pegang</h2>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div v-for="(v, i) in values" :key="i" class="bg-white/5 border border-white/10 rounded-2xl p-7 hover:bg-white/10 hover:-translate-y-1 transition-all">
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mb-5 shadow-lg shadow-orange-500/20">
+              <component :is="v.icon" class="w-7 h-7 text-white" />
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">{{ v.title }}</h3>
+            <p class="text-gray-400 text-sm leading-relaxed">{{ v.desc }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2e. MILESTONE TIMELINE -->
+    <section class="py-24 bg-white reveal">
+      <div class="container max-w-5xl mx-auto px-6">
+        <div class="text-center max-w-2xl mx-auto mb-16">
+          <div class="inline-flex items-center justify-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
+            <span class="w-8 h-0.5 bg-orange-500"></span> Perjalanan Kami <span class="w-8 h-0.5 bg-orange-500"></span>
+          </div>
+          <h2 class="text-4xl font-bold text-slate-900">Jejak Langkah JAGAYA</h2>
+        </div>
+        <div class="relative">
+          <div class="absolute left-[27px] md:left-1/2 top-0 bottom-0 w-0.5 bg-orange-100 md:-translate-x-1/2"></div>
+          <div class="space-y-10">
+            <div v-for="(ms, i) in milestones" :key="i"
+              class="relative flex items-start gap-6 md:gap-0"
+              :class="i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'">
+              <div class="hidden md:block md:w-1/2"></div>
+              <div class="absolute left-0 md:left-1/2 md:-translate-x-1/2 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-red-600 text-white flex items-center justify-center font-black text-sm shadow-lg shadow-orange-500/30 z-10 shrink-0">
+                {{ ms.year }}
+              </div>
+              <div class="flex-1 md:w-1/2 ml-20 md:ml-0 bg-slate-50 border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-shadow"
+                :class="i % 2 === 0 ? 'md:mr-12' : 'md:ml-12'">
+                <h3 class="text-lg font-black text-slate-900 mb-1">{{ ms.title }}</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">{{ ms.desc }}</p>
               </div>
             </div>
           </div>
@@ -188,24 +352,54 @@ onMounted(() => {
     <section class="py-24 bg-slate-50">
       <div class="container max-w-7xl mx-auto px-6">
         <div class="text-center max-w-2xl mx-auto mb-16 reveal">
-          <div class="flex items-center justify-center gap-3 text-blue-600 font-bold tracking-widest text-xs uppercase mb-4">
-            <span class="w-8 h-0.5 bg-blue-600"></span> Layanan Kami <span class="w-8 h-0.5 bg-blue-600"></span>
+          <div class="flex items-center justify-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
+            <span class="w-8 h-0.5 bg-orange-500"></span> Layanan Kami <span class="w-8 h-0.5 bg-orange-500"></span>
           </div>
           <h2 class="text-4xl font-bold text-slate-900">Layanan Tanggap Darurat Terpercaya</h2>
         </div>
         
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 reveal">
-          <div v-for="(srv, i) in services" :key="i" class="bg-white group cursor-pointer border border-gray-100 hover:border-blue-600 hover:shadow-xl transition-all duration-300">
-            <div class="h-48 overflow-hidden relative">
-              <img :src="srv.img" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-              <div class="absolute bottom-0 right-0 bg-blue-600 w-12 h-12 flex items-center justify-center text-white">
-                <ChevronRightIcon class="w-6 h-6" />
+        <div class="grid lg:grid-cols-12 gap-8 items-stretch reveal">
+          <!-- Tab buttons -->
+          <div class="lg:col-span-5 flex flex-col gap-3">
+            <button
+              v-for="(srv, i) in services" :key="i"
+              @click="activeService = i"
+              class="text-left px-5 py-4 rounded-xl flex items-center gap-4 border transition-all duration-300"
+              :class="activeService === i
+                ? 'bg-white border-orange-500 shadow-lg shadow-orange-500/10 scale-[1.02]'
+                : 'bg-white/60 border-gray-100 hover:border-orange-200 hover:bg-white'"
+            >
+              <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0">
+                <img :src="srv.img" class="w-full h-full object-cover" />
               </div>
-            </div>
-            <div class="p-8">
-              <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">{{ srv.title }}</h3>
-              <p class="text-gray-500">{{ srv.desc }}</p>
-            </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-bold text-slate-900 text-[15px] truncate">{{ srv.title }}</h4>
+                <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ srv.desc }}</p>
+              </div>
+              <ChevronRightIcon v-if="activeService === i" class="w-5 h-5 text-orange-500 shrink-0" />
+            </button>
+          </div>
+
+          <!-- Detail panel -->
+          <div class="lg:col-span-7">
+            <transition name="dev-fade" mode="out-in">
+              <div :key="activeService" class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-xl h-full">
+                <div class="h-72 relative overflow-hidden">
+                  <img :src="services[activeService].img" class="w-full h-full object-cover" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+                  <div class="absolute bottom-6 left-6 right-6 text-white">
+                    <h3 class="text-2xl font-bold mb-2">{{ services[activeService].title }}</h3>
+                    <p class="text-gray-200 text-sm">{{ services[activeService].desc }}</p>
+                  </div>
+                </div>
+                <div class="p-8 flex items-center justify-between gap-4">
+                  <p class="text-sm text-gray-500">Layanan {{ activeService + 1 }} dari {{ services.length }}</p>
+                  <button class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-bold transition-colors">
+                    Selengkapnya <ArrowRightIcon class="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </transition>
           </div>
         </div>
       </div>
@@ -216,8 +410,8 @@ onMounted(() => {
       <div class="container max-w-7xl mx-auto px-6">
         <div class="grid lg:grid-cols-2 gap-16 items-center">
           <div class="reveal">
-            <div class="flex items-center gap-3 text-blue-600 font-bold tracking-widest text-xs uppercase mb-4">
-              <span class="w-8 h-0.5 bg-blue-600"></span> Keahlian Utama
+            <div class="flex items-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
+              <span class="w-8 h-0.5 bg-orange-500"></span> Keahlian Utama
             </div>
             <h2 class="text-4xl font-bold text-slate-900 mb-6">
               Sistem Yang Menjaga<br>Keselamatan Tetap Berjalan.
@@ -233,7 +427,7 @@ onMounted(() => {
                   <span>95%</span>
                 </div>
                 <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                  <div class="bg-blue-600 h-full" style="width: 95%"></div>
+                  <div class="bg-orange-500 h-full" style="width: 95%"></div>
                 </div>
               </div>
               <div>
@@ -242,7 +436,7 @@ onMounted(() => {
                   <span>98%</span>
                 </div>
                 <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                  <div class="bg-blue-600 h-full" style="width: 98%"></div>
+                  <div class="bg-orange-500 h-full" style="width: 98%"></div>
                 </div>
               </div>
               <div>
@@ -255,7 +449,7 @@ onMounted(() => {
                 </div>
               </div>
             </div>
-            <button class="mt-10 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded font-bold transition-colors">
+            <button class="mt-10 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded font-bold transition-colors">
               Pesan Layanan Sekarang
             </button>
           </div>
@@ -274,40 +468,40 @@ onMounted(() => {
     <section class="py-24 bg-white border-t border-gray-100">
       <div class="container max-w-7xl mx-auto px-6">
         <div class="text-center max-w-2xl mx-auto mb-20 reveal">
-          <div class="flex items-center justify-center gap-3 text-blue-600 font-bold tracking-widest text-xs uppercase mb-4">
-            <span class="w-8 h-0.5 bg-blue-600"></span> Proses Kerja <span class="w-8 h-0.5 bg-blue-600"></span>
+          <div class="flex items-center justify-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
+            <span class="w-8 h-0.5 bg-orange-500"></span> Proses Kerja <span class="w-8 h-0.5 bg-orange-500"></span>
           </div>
           <h2 class="text-4xl font-bold text-slate-900">Alur Manajemen Bencana Mulus</h2>
         </div>
 
         <div class="relative max-w-5xl mx-auto reveal">
           <!-- Connecting Line -->
-          <div class="hidden md:block absolute top-12 left-0 w-full h-0.5 bg-blue-100 border-t border-dashed border-blue-300"></div>
+          <div class="hidden md:block absolute top-12 left-0 w-full h-0.5 bg-orange-100 border-t border-dashed border-orange-300"></div>
           
           <div class="grid md:grid-cols-4 gap-8">
             <div class="relative text-center">
-              <div class="w-24 h-24 mx-auto bg-white border-4 border-blue-600 rounded-full flex items-center justify-center text-blue-600 relative z-10 mb-6 shadow-[0_0_0_8px_rgba(255,255,255,1)]">
+              <div class="w-24 h-24 mx-auto bg-white border-4 border-orange-500 rounded-full flex items-center justify-center text-orange-500 relative z-10 mb-6 shadow-[0_0_0_8px_rgba(255,255,255,1)]">
                 <PhoneIcon class="w-10 h-10" />
               </div>
               <h4 class="font-bold text-slate-900 mb-2">1. Laporan Masuk</h4>
               <p class="text-sm text-gray-500">Menerima informasi darurat via aplikasi atau call center.</p>
             </div>
             <div class="relative text-center">
-              <div class="w-24 h-24 mx-auto bg-white border-4 border-blue-600 rounded-full flex items-center justify-center text-blue-600 relative z-10 mb-6 shadow-[0_0_0_8px_rgba(255,255,255,1)]">
+              <div class="w-24 h-24 mx-auto bg-white border-4 border-orange-500 rounded-full flex items-center justify-center text-orange-500 relative z-10 mb-6 shadow-[0_0_0_8px_rgba(255,255,255,1)]">
                 <MapPinIcon class="w-10 h-10" />
               </div>
               <h4 class="font-bold text-slate-900 mb-2">2. Verifikasi Lokasi</h4>
               <p class="text-sm text-gray-500">Pemetaan GIS untuk rute evakuasi teraman.</p>
             </div>
             <div class="relative text-center">
-              <div class="w-24 h-24 mx-auto bg-white border-4 border-blue-600 rounded-full flex items-center justify-center text-blue-600 relative z-10 mb-6 shadow-[0_0_0_8px_rgba(255,255,255,1)]">
+              <div class="w-24 h-24 mx-auto bg-white border-4 border-orange-500 rounded-full flex items-center justify-center text-orange-500 relative z-10 mb-6 shadow-[0_0_0_8px_rgba(255,255,255,1)]">
                 <GlobeAltIcon class="w-10 h-10" />
               </div>
               <h4 class="font-bold text-slate-900 mb-2">3. Mobilisasi Tim</h4>
               <p class="text-sm text-gray-500">Pengiriman relawan dan armada logistik segera.</p>
             </div>
             <div class="relative text-center">
-              <div class="w-24 h-24 mx-auto bg-blue-600 border-4 border-blue-600 rounded-full flex items-center justify-center text-white relative z-10 mb-6 shadow-[0_0_0_8px_rgba(255,255,255,1)]">
+              <div class="w-24 h-24 mx-auto bg-orange-500 border-4 border-orange-500 rounded-full flex items-center justify-center text-white relative z-10 mb-6 shadow-[0_0_0_8px_rgba(255,255,255,1)]">
                 <CheckCircleIcon class="w-10 h-10" />
               </div>
               <h4 class="font-bold text-slate-900 mb-2">4. Distribusi Selesai</h4>
@@ -322,8 +516,8 @@ onMounted(() => {
     <section class="py-24 bg-slate-50 border-t border-gray-100">
       <div class="container max-w-7xl mx-auto px-6">
         <div class="text-center max-w-2xl mx-auto mb-16 reveal">
-          <div class="flex items-center justify-center gap-3 text-blue-600 font-bold tracking-widest text-xs uppercase mb-4">
-            <span class="w-8 h-0.5 bg-blue-600"></span> Prestasi & Apresiasi <span class="w-8 h-0.5 bg-blue-600"></span>
+          <div class="flex items-center justify-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
+            <span class="w-8 h-0.5 bg-orange-500"></span> Prestasi & Apresiasi <span class="w-8 h-0.5 bg-orange-500"></span>
           </div>
           <h2 class="text-4xl font-bold text-slate-900">Jejak Langkah & Penghargaan</h2>
           <p class="mt-4 text-gray-500 text-sm">Dedikasi dan inovasi berkelanjutan dalam memimpin transformasi sistem tanggap darurat nasional bersama para pemimpin negeri.</p>
@@ -336,7 +530,9 @@ onMounted(() => {
           
           <div class="marquee-content flex gap-8 w-max">
             <!-- 7 Items Clean Elegant Style -->
-<div v-for="n in 7" :key="n" class="w-96 flex-shrink-0 bg-white p-6 border-2 border-slate-100 rounded-xl group hover:shadow-2xl transition-all cursor-pointer relative overflow-hidden hover:border-blue-200">
+<div v-for="n in 7" :key="n"
+              @click="openLightbox(n === 2 ? awardsImg.presiden : n === 3 ? awardsImg.nasional : n === 4 ? awardsImg.inovasiAi : n === 7 ? awardsImg.kemanusiaan : awardsImg.default, ['Penghargaan Inovasi Nasional', 'Apresiasi Presiden RI', 'Audiensi Menteri Sosial', 'Pemaparan RUU DPR', 'Delegasi Internasional', 'Award Teknologi AI', 'Penghargaan Kemanusiaan'][n - 1])"
+              class="w-96 flex-shrink-0 bg-white p-6 border-2 border-slate-100 rounded-xl group hover:shadow-2xl transition-all cursor-pointer relative overflow-hidden hover:border-orange-200">
               <div class="aspect-[4/3] overflow-hidden mb-6 relative rounded-xl bg-gray-50 shadow-inner">
 <!-- Item ke-2 = Apresiasi Presiden RI -->
                 <!-- Item ke-7 = Penghargaan Kemanusiaan -->
@@ -346,13 +542,15 @@ onMounted(() => {
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   style="transform: scale(1.12)"
                 />
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                  <span class="text-white text-xs font-bold bg-white/15 border border-white/30 backdrop-blur px-3 py-1.5 rounded-full">Klik untuk perbesar</span>
+                </div>
               </div>
               <div class="text-center">
                 <h4 class="font-black text-slate-900 text-lg leading-tight mb-2">
                   {{ ['Penghargaan Inovasi Nasional', 'Apresiasi Presiden RI', 'Audiensi Menteri Sosial', 'Pemaparan RUU DPR', 'Delegasi Internasional', 'Award Teknologi AI', 'Penghargaan Kemanusiaan'][n - 1] }}
                 </h4>
-                <p class="text-blue-600 text-sm font-bold tracking-widest uppercase">Tahun {{ 2026 - (n % 3) }}</p>
+                <p class="text-orange-500 text-sm font-bold tracking-widest uppercase">Tahun {{ 2026 - (n % 3) }}</p>
               </div>
             </div>
             
@@ -366,7 +564,7 @@ onMounted(() => {
                 <h4 class="font-black text-slate-900 text-lg leading-tight mb-2">
                   {{ ['Penghargaan Inovasi Nasional', 'Apresiasi Presiden RI', 'Audiensi Menteri Sosial', 'Pemaparan RUU DPR', 'Delegasi Internasional', 'Award Teknologi AI', 'Penghargaan Kemanusiaan'][n - 1] }}
                 </h4>
-                <p class="text-blue-600 text-sm font-bold tracking-widest uppercase">Tahun {{ 2026 - (n % 3) }}</p>
+                <p class="text-orange-500 text-sm font-bold tracking-widest uppercase">Tahun {{ 2026 - (n % 3) }}</p>
               </div>
             </div>
           </div>
@@ -379,17 +577,27 @@ onMounted(() => {
       <div class="container max-w-7xl mx-auto px-6">
         <div class="grid lg:grid-cols-2 gap-16 items-start">
           <div class="reveal">
-            <div class="flex items-center gap-3 text-blue-600 font-bold tracking-widest text-xs uppercase mb-4">
-              <span class="w-8 h-0.5 bg-blue-600"></span> FAQ
+            <div class="flex items-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
+              <span class="w-8 h-0.5 bg-orange-500"></span> FAQ
             </div>
             <h2 class="text-4xl font-bold text-slate-900 mb-8">Pertanyaan Umum</h2>
             
             <div class="space-y-4">
-              <div v-for="(f, i) in faqs" :key="i" class="border border-gray-200 p-6 rounded cursor-pointer hover:border-blue-600 transition-colors">
-                <div class="flex justify-between items-center">
+              <div v-for="(f, i) in faqs" :key="i"
+                @click="toggleFaq(i)"
+                class="border p-6 rounded-lg cursor-pointer transition-colors"
+                :class="openFaq === i ? 'border-orange-500 bg-orange-50/40' : 'border-gray-200 hover:border-orange-300'">
+                <div class="flex justify-between items-center gap-4">
                   <h4 class="font-bold text-slate-900">{{ f.q }}</h4>
-                  <div class="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-500">+</div>
+                  <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-colors"
+                    :class="openFaq === i ? 'bg-orange-500 text-white border-orange-500' : 'border border-gray-300 text-gray-500'">
+                    <MinusIcon v-if="openFaq === i" class="w-4 h-4" />
+                    <PlusIcon v-else class="w-4 h-4" />
+                  </div>
                 </div>
+                <transition name="dev-acc">
+                  <p v-if="openFaq === i" class="text-gray-500 text-sm leading-relaxed mt-4">{{ f.a }}</p>
+                </transition>
               </div>
             </div>
           </div>
@@ -402,56 +610,56 @@ onMounted(() => {
     </section>
 
     <!-- ████ FOOTER ████ -->
-    <footer class="bg-gray-950 pt-16 pb-8 font-sans">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-          <div class="md:col-span-1">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
-                <span class="text-white font-bold text-xl">J</span>
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="footer-logo">
+              <div class="footer-logo-icon">
+                <ShieldCheckIcon class="w-5 h-5 text-white"/>
               </div>
-              <span class="text-xl font-black text-white">JAGAYA</span>
+              <span>JAGAYA</span>
             </div>
-            <p class="text-gray-500 text-[13px] font-medium leading-relaxed mb-6">
-              Platform manajemen bencana terpadu untuk Kabupaten Demak. Menghubungkan pemerintah, relawan, dan masyarakat.
-            </p>
-            <div class="flex gap-3">
-              <a href="#" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-gradient-to-br hover:from-blue-600 hover:to-indigo-600 flex items-center justify-center transition-all"><PhoneIcon class="w-4 h-4 text-gray-400"/></a>
-              <a href="#" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-gradient-to-br hover:from-blue-600 hover:to-indigo-600 flex items-center justify-center transition-all"><EnvelopeIcon class="w-4 h-4 text-gray-400"/></a>
+            <p class="footer-desc">Platform manajemen krisis bencana terpadu untuk Kabupaten Demak. Cepat, transparan, dan terkoordinasi.</p>
+            <div class="footer-socials">
+              <a href="#" class="footer-social"><PhoneIcon class="w-4 h-4 text-gray-400"/></a>
+              <a href="#" class="footer-social"><EnvelopeIcon class="w-4 h-4 text-gray-400"/></a>
             </div>
           </div>
           <div>
-            <p class="text-white font-black text-[13px] uppercase tracking-wider mb-4">Layanan</p>
-            <ul class="space-y-3">
-              <li v-for="l in ['Pemetaan Banjir','Distribusi Logistik','Koordinasi Relawan','Peringatan Dini']" :key="l">
-                <a href="#" class="text-gray-500 hover:text-blue-400 text-[13px] font-medium transition-colors">{{ l }}</a>
+            <p class="footer-heading">Menu</p>
+            <ul class="footer-links">
+              <li v-for="l in [{t:'Dashboard',p:'/dashboard'},{t:'Pengungsian',p:'/pengungsian'},{t:'Relawan',p:'/relawan'},{t:'Donasi',p:'/donasi'}]" :key="l.p">
+                <router-link :to="l.p">{{ l.t }}</router-link>
               </li>
             </ul>
           </div>
           <div>
-            <p class="text-white font-black text-[13px] uppercase tracking-wider mb-4">Menu Utama</p>
-            <ul class="space-y-3">
-              <li v-for="l in [{t:'Beranda',p:'/landing'},{t:'Dashboard',p:'/dashboard'},{t:'Donasi',p:'/donasi'},{t:'Relawan',p:'/relawan'}]" :key="l.p">
-                <router-link :to="l.p" class="text-gray-500 hover:text-blue-400 text-[13px] font-medium transition-colors">{{ l.t }}</router-link>
-              </li>
+            <p class="footer-heading">Kontak</p>
+            <ul class="footer-contact">
+              <li>Jl. Pemuda No.1, Demak</li>
+              <li>+62 291-685 000</li>
+              <li>info@jagaya.id</li>
             </ul>
-          </div>
-          <div>
-            <p class="text-white font-black text-[13px] uppercase tracking-wider mb-4">Newsletter</p>
-            <p class="text-gray-500 text-[13px] mb-4">Dapatkan update terkini tentang kondisi bencana.</p>
-            <div class="flex gap-2">
-              <input type="email" placeholder="Email Address" class="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-600">
-              <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 rounded flex items-center justify-center">
-                <ArrowRightIcon class="w-4 h-4" />
-              </button>
-            </div>
           </div>
         </div>
-        <div class="border-t border-white/10 pt-8 text-center text-[12px] text-gray-600 font-medium">
+        <div class="footer-bottom">
           <p>© 2026 JAGAYA System. All Rights Reserved.</p>
+          <p>Didedikasikan untuk Penanggulangan Bencana Demak </p>
         </div>
       </div>
     </footer>
+
+    <!-- LIGHTBOX PENGHARGAAN -->
+    <transition name="dev-fade">
+      <div v-if="lightboxImg" class="dev-lightbox" @click.self="closeLightbox">
+        <button class="dev-lightbox__close" @click="closeLightbox"><XMarkIcon class="w-6 h-6" /></button>
+        <div class="dev-lightbox__inner">
+          <img :src="lightboxImg" :alt="lightboxTitle" />
+          <p class="dev-lightbox__caption">{{ lightboxTitle }}</p>
+        </div>
+      </div>
+    </transition>
 
   </div>
 </template>
@@ -482,6 +690,38 @@ onMounted(() => {
   100% { transform: translateX(calc(-50% - 12px)); } /* 50% width + half gap */
 }
 
+/* Service tab fade */
+.dev-fade-enter-active,.dev-fade-leave-active{transition:all .3s cubic-bezier(.16,1,.3,1)}
+.dev-fade-enter-from{opacity:0;transform:translateY(12px)}
+.dev-fade-leave-to{opacity:0;transform:translateY(-12px)}
+
+/* FAQ accordion */
+.dev-acc-enter-active,.dev-acc-leave-active{transition:all .3s ease;overflow:hidden}
+.dev-acc-enter-from,.dev-acc-leave-to{opacity:0;max-height:0;margin-top:0}
+.dev-acc-enter-to,.dev-acc-leave-from{opacity:1;max-height:200px}
+
+/* Lightbox */
+.dev-lightbox{
+  position:fixed;inset:0;z-index:60;
+  background:rgba(2,6,23,.85);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.dev-lightbox__inner{max-width:880px;width:100%;text-align:center}
+.dev-lightbox__inner img{
+  width:100%;max-height:78vh;object-fit:contain;
+  border-radius:16px;box-shadow:0 32px 100px rgba(0,0,0,.5);
+}
+.dev-lightbox__caption{
+  color:#fff;font-weight:800;font-size:16px;margin-top:16px;
+}
+.dev-lightbox__close{
+  position:absolute;top:24px;right:24px;
+  width:44px;height:44px;border-radius:999px;border:none;cursor:pointer;
+  background:rgba(255,255,255,.12);color:#fff;
+  display:flex;align-items:center;justify-content:center;transition:background .3s;
+}
+.dev-lightbox__close:hover{background:rgba(255,255,255,.25)}
+
 /* Transitions */
 .fade-enter-active,.fade-leave-active{transition:opacity .25s ease}
 .animate-spin-slow {
@@ -489,5 +729,121 @@ onMounted(() => {
 }
 @keyframes spin {
   100% { transform: translate(0, -50%) rotate(360deg); }
+}
+
+/* ══════════════════════════════════════════════════════
+   FOOTER (identik dengan HomePage)
+   ══════════════════════════════════════════════════════ */
+.site-footer {
+  background: #030712;
+  padding: 64px 0 32px;
+}
+.site-footer .container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+@media (min-width:640px) { .site-footer .container { padding:0 24px; } }
+@media (min-width:1024px) { .site-footer .container { padding:0 32px; } }
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+@media (min-width:768px) {
+  .footer-grid { grid-template-columns: 2fr 1fr 1fr; }
+}
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.footer-logo-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #dc2626, #f97316);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.footer-logo span {
+  font-size: 20px;
+  font-weight: 900;
+  color: white;
+}
+.footer-desc {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.7;
+  max-width: 320px;
+}
+.footer-socials {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+.footer-social {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+.footer-social:hover {
+  background: linear-gradient(135deg, #dc2626, #f97316);
+}
+.footer-heading {
+  color: white;
+  font-weight: 900;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.footer-links li { margin-bottom: 12px; }
+.footer-links a {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+.footer-links a:hover { color: #f97316; }
+.footer-contact {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.footer-contact li {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: #4b5563;
+  font-weight: 500;
+}
+@media (min-width:768px) {
+  .footer-bottom { flex-direction: row; justify-content: space-between; }
 }
 </style>
