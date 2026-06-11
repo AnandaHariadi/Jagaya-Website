@@ -2,6 +2,8 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ShieldCheckIcon } from '@heroicons/vue/24/solid'
+import logoImg from '../assets/logo-jagaya.png'
+import fotoImg from '../assets/foto.png'
 
 const router = useRouter()
 const route = useRoute()
@@ -47,8 +49,8 @@ const handleLogin = () => {
 
       <!-- Content -->
       <div class="relative z-20 text-center text-white max-w-lg">
-        <div class="w-20 h-20 bg-white rounded-3xl mx-auto mb-8 flex items-center justify-center shadow-2xl transform -rotate-6">
-          <ShieldCheckIcon class="w-12 h-12 text-orange-600" />
+        <div class="inline-flex bg-white rounded-3xl p-4 mx-auto mb-8 items-center justify-center shadow-2xl transform -rotate-6">
+          <img :src="logoImg" alt="JAGAYA" class="w-28 h-28 object-contain" />
         </div>
         <h1 class="text-5xl font-black mb-6 tracking-tight">JAGAYA System</h1>
         <p class="text-lg font-medium text-white/90 leading-relaxed mb-8">
@@ -65,6 +67,17 @@ const handleLogin = () => {
           <div>
             <p class="text-3xl font-black">1.2K</p>
             <p class="text-[11px] font-bold uppercase tracking-wider text-orange-200">Relawan</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Founder Profile Pill -->
+      <div class="absolute bottom-8 left-8 z-20">
+        <div class="flex items-center gap-4 bg-black/40 backdrop-blur-lg border border-white/10 px-5 py-3 rounded-full hover:bg-black/50 transition-colors cursor-default shadow-xl">
+          <img :src="fotoImg" class="w-12 h-12 rounded-full border-2 border-orange-500 object-cover shadow-[0_0_15px_rgba(249,115,22,0.4)]" alt="Founder" />
+          <div class="text-left pr-2">
+            <p class="text-white font-bold text-[14px]">M. Ananda Hariadi</p>
+            <p class="text-orange-400 text-xs font-black tracking-wider uppercase">Founder JAGAYA</p>
           </div>
         </div>
       </div>

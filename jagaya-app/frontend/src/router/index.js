@@ -46,6 +46,23 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/logistik',
+    name: 'Logistik',
+    component: () => import('../pages/LogistikPage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/laporan',
+    name: 'Laporan',
+    component: () => import('../pages/LaporanPage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/forum',
+    name: 'Forum',
+    component: () => import('../pages/ForumPage.vue')
+  },
+  {
     path: '/developer',
     name: 'Developer',
     component: () => import('../pages/DeveloperPage.vue')

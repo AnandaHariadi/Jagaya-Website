@@ -1,7 +1,9 @@
 <script setup>
-import { TruckIcon, ArchiveBoxIcon, ExclamationCircleIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
+import { ref } from 'vue'
+import { TruckIcon, ArchiveBoxIcon, ExclamationCircleIcon, ArrowPathIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
 import { Bar } from 'vue-chartjs'
+import DashboardLayout from '../components/DashboardLayout.vue'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
@@ -28,23 +30,41 @@ const chartOpts = {
   plugins: { legend: { position: 'top' } }
 }
 
-const deliveries = [
+const deliveries = ref([
   { id: 'DEL-001', tujuan: 'Posko Karanganyar', barang: '500 Porsi Makanan Siap Saji', status: 'Dalam Perjalanan', waktu: 'ETA: 15 Menit' },
   { id: 'DEL-002', tujuan: 'Posko Sayung', barang: '200 Selimut & 50 Matras', status: 'Loading', waktu: 'ETA: 45 Menit' },
   { id: 'DEL-003', tujuan: 'Balai Desa Mijen', barang: '15 Dus Obat Medis Dasar', status: 'Selesai', waktu: 'Terkirim Pukul 08:00' },
-]
+])
+
+/* ── Input Barang Masuk modal ── */
+const showModal = ref(false)
+const form = ref({ tujuan: '', barang: '', status: 'Loading' })
+const openModal = () => { form.value = { tujuan: '', barang: '', status: 'Loading' }; showModal.value = true }
+const addDelivery = () => {
+  if (!form.value.tujuan.trim() || !form.value.barang.trim()) return
+  const num = String(deliveries.value.length + 1).padStart(3, '0')
+  deliveries.value.unshift({
+    id: 'DEL-' + num,
+    tujuan: form.value.tujuan.trim(),
+    barang: form.value.barang.trim(),
+    status: form.value.status,
+    waktu: form.value.status === 'Selesai' ? 'Baru dicatat' : 'ETA: Menunggu',
+  })
+  showModal.value = false
+}
 </script>
 
 <template>
-  <div class="bg-gray-50 min-h-screen font-sans pb-24">
-    <div class="bg-white pt-10 pb-16 border-b border-gray-200">
+  <DashboardLayout>
+    <div class="font-sans pb-24">
+    <div class="bg-white pt-8 pb-10 border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-end justify-between">
+        <div class="flex items-end justify-between flex-wrap gap-4">
           <div>
             <span class="text-orange-600 text-[11px] font-bold uppercase tracking-widest mb-2 block">Manajemen Rantai Pasok</span>
             <h1 class="text-3xl font-black text-gray-900 tracking-tight">Gudang & Logistik</h1>
           </div>
-          <button class="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-orange-600 transition-colors shadow-lg flex items-center gap-2">
+          <button class="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-orange-600 transition-colors shadow-lg flex items-center gap-2" @click="openModal" type="button">
             <ArchiveBoxIcon class="w-5 h-5" /> Input Barang Masuk
           </button>
         </div>
@@ -112,10 +132,58 @@ const deliveries = [
       </div>
 
     </div>
-  </div>
+    </div>
+
+    <!-- Modal Input Barang -->
+    <transition name="fade">
+      <div v-if="showModal" class="modal-backdrop" @click.self="showModal = false">
+        <div class="modal-box">
+          <div class="modal-head">
+            <h3>Input Barang / Distribusi Baru</h3>
+            <button @click="showModal = false" class="modal-close"><XMarkIcon class="w-5 h-5" /></button>
+          </div>
+          <div class="modal-body">
+            <label class="modal-label">Tujuan Pengiriman</label>
+            <input v-model="form.tujuan" type="text" placeholder="cth. Posko Bonang" class="modal-input" />
+            <label class="modal-label">Muatan / Barang</label>
+            <input v-model="form.barang" type="text" placeholder="cth. 300 Dus Air Mineral" class="modal-input" />
+            <label class="modal-label">Status</label>
+            <select v-model="form.status" class="modal-input">
+              <option>Loading</option>
+              <option>Dalam Perjalanan</option>
+              <option>Selesai</option>
+            </select>
+          </div>
+          <div class="modal-foot">
+            <button class="modal-btn-ghost" @click="showModal = false" type="button">Batal</button>
+            <button class="modal-btn-primary" @click="addDelivery" :disabled="!form.tujuan.trim() || !form.barang.trim()" type="button">Catat Distribusi</button>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </DashboardLayout>
 </template>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 * { font-family: 'Inter', system-ui, sans-serif; }
+
+.modal-backdrop { position: fixed; inset: 0; z-index: 200; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.modal-box { width: 100%; max-width: 460px; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 32px 80px rgba(0,0,0,0.3); }
+.modal-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #f1f5f9; }
+.modal-head h3 { font-size: 17px; font-weight: 900; color: #111827; }
+.modal-close { width: 34px; height: 34px; border-radius: 999px; border: none; background: #f1f5f9; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { background: #fee2e2; color: #dc2626; }
+.modal-body { padding: 20px 24px; }
+.modal-label { display: block; font-size: 12px; font-weight: 800; color: #475569; margin: 12px 0 6px; }
+.modal-label:first-child { margin-top: 0; }
+.modal-input { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 14px; outline: none; }
+.modal-input:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.12); }
+.modal-foot { display: flex; gap: 12px; padding: 16px 24px 24px; }
+.modal-btn-ghost { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; font-weight: 800; color: #475569; cursor: pointer; }
+.modal-btn-ghost:hover { background: #f8fafc; }
+.modal-btn-primary { flex: 2; padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, #f97316, #dc2626); color: #fff; font-weight: 800; cursor: pointer; }
+.modal-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

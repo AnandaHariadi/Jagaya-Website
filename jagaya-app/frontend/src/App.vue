@@ -4,7 +4,8 @@ import { useRoute } from 'vue-router'
 import Navbar from './components/Navbar.vue'
 
 const route = useRoute()
-const showNavbar = computed(() => !['Splash', 'Login', 'Dashboard'].includes(route.name))
+const hiddenNavbarPages = ['Splash', 'Login', 'Dashboard', 'Pengungsian', 'Relawan', 'Donasi', 'Logistik', 'Laporan']
+const showNavbar = computed(() => !hiddenNavbarPages.includes(route.name))
 </script>
 
 <template>

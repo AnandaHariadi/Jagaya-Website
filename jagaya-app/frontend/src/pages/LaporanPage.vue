@@ -1,9 +1,12 @@
 <script setup>
-import { DocumentChartBarIcon, ArrowDownTrayIcon, PrinterIcon, ShareIcon } from '@heroicons/vue/24/outline'
+import { DocumentChartBarIcon, ArrowDownTrayIcon, PrinterIcon } from '@heroicons/vue/24/outline'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js'
 import { Line } from 'vue-chartjs'
+import DashboardLayout from '../components/DashboardLayout.vue'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler)
+
+const cetak = () => window.print()
 
 // Analytics Data
 const annualData = {
@@ -25,19 +28,20 @@ const chartOpts = {
 </script>
 
 <template>
-  <div class="bg-gray-50 min-h-screen font-sans pb-24">
-    <div class="bg-white pt-10 pb-16 border-b border-gray-200">
+  <DashboardLayout>
+    <div class="font-sans pb-24">
+    <div class="bg-white pt-8 pb-10 border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-end justify-between">
+        <div class="flex items-end justify-between flex-wrap gap-4">
           <div>
             <span class="text-blue-600 text-[11px] font-bold uppercase tracking-widest mb-2 block">Rekapitulasi Sistem</span>
             <h1 class="text-3xl font-black text-gray-900 tracking-tight">Laporan & Evaluasi Kinerja</h1>
           </div>
           <div class="flex gap-3">
-            <button class="bg-white border border-gray-200 text-gray-700 px-4 py-2.5 rounded-xl font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2">
+            <button class="bg-white border border-gray-200 text-gray-700 px-4 py-2.5 rounded-xl font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2" @click="cetak" type="button">
               <PrinterIcon class="w-5 h-5" /> Cetak
             </button>
-            <button class="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg flex items-center gap-2">
+            <button class="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg flex items-center gap-2" @click="cetak" type="button">
               <ArrowDownTrayIcon class="w-5 h-5" /> Export PDF
             </button>
           </div>
@@ -111,7 +115,8 @@ const chartOpts = {
       </div>
 
     </div>
-  </div>
+    </div>
+  </DashboardLayout>
 </template>
 
 <style scoped>

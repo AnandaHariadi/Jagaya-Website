@@ -1,12 +1,14 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import {
   CheckCircleIcon, ChevronRightIcon, PlayIcon,
   PhoneIcon, EnvelopeIcon, MapPinIcon, GlobeAltIcon,
   ArrowRightIcon, XMarkIcon, PlusIcon, MinusIcon,
   BuildingOffice2Icon, UserGroupIcon, GiftIcon, ClockIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon, CpuChipIcon, SignalIcon, BoltIcon
 } from '@heroicons/vue/24/outline'
+import 'leaflet/dist/leaflet.css'
+import { LMap, LTileLayer, LCircleMarker, LPopup } from '@vue-leaflet/vue-leaflet'
 
 /* ── Images ──────────────────────────────────────────── */
 import heroImg from '../assets/about_hero.png'
@@ -16,6 +18,7 @@ import impactImg from '../assets/about_impact.png'
 import partnersImg from '../assets/about_partners.png'
 import communityImg from '../assets/about_community.png'
 import fotoImg from '../assets/foto.png'
+import logoImg from '../assets/logo-jagaya.png'
 
 /* Since AI Image Generation is currently hitting a strict global quota limit (Rate Limit 429),
    we use high-quality, highly relevant Unsplash placeholder images for the requested political/award scenarios. */
@@ -57,6 +60,11 @@ const awardsImg = {
   // untuk item lain tetap memakai placeholder fotoImg
   default: fotoImg
 }
+
+const awards = [
+  { img: prabowoImg, title: 'Apresiasi Presiden RI', year: '2025' },
+  { img: penghargaanKemanusiaanImg, title: 'Penghargaan Kemanusiaan', year: '2024' },
+]
 
 
 
@@ -120,7 +128,30 @@ const milestones = [
   { year: '2026', title: 'Platform Terpadu', desc: 'Dashboard, donasi transparan, forum aspirasi, dan logistik dalam satu sistem.' },
 ]
 
+/* ── LIVE MAP · KONDISI TERKINI DEMAK ───────────── */
+const mapZoom = ref(11)
+const mapCenter = ref([-6.8953, 110.6386]) // pusat Kabupaten Demak
+const mapOptions = { zoomControl: false, scrollWheelZoom: false, attributionControl: false }
+const areaKondisi = ref([
+  { id: 1, nama: 'Sayung',      lat: -6.9320, lng: 110.4760, status: 'Kritis',   tma: '120 cm', warga: 3200 },
+  { id: 2, nama: 'Karanganyar', lat: -6.9180, lng: 110.6080, status: 'Kritis',   tma: '95 cm',  warga: 2800 },
+  { id: 3, nama: 'Mijen',       lat: -6.8120, lng: 110.7350, status: 'Waspada',  tma: '60 cm',  warga: 1500 },
+  { id: 4, nama: 'Gajah',       lat: -6.8900, lng: 110.7700, status: 'Waspada',  tma: '45 cm',  warga: 980  },
+  { id: 5, nama: 'Demak Kota',  lat: -6.8907, lng: 110.6370, status: 'Aman',     tma: '15 cm',  warga: 600  },
+  { id: 6, nama: 'Wonosalam',   lat: -6.9540, lng: 110.6720, status: 'Aman',     tma: '10 cm',  warga: 300  },
+])
+const statusColor = (s) => s === 'Kritis' ? '#ef4444' : s === 'Waspada' ? '#f59e0b' : '#22c55e'
+
+/* ── LIVE CLOCK ─────────────────────────────────── */
+const liveTime = ref('--:--:--')
+let clockTimer = null
+const tickClock = () => {
+  liveTime.value = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+}
+
 onMounted(() => {
+  tickClock()
+  clockTimer = setInterval(tickClock, 1000)
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
@@ -131,120 +162,165 @@ onMounted(() => {
   }, { threshold: 0.1 })
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el))
 })
+onUnmounted(() => { if (clockTimer) clearInterval(clockTimer) })
+
+const showFounderModal = ref(false)
 </script>
 
 <template>
   <div class="transport-theme font-sans text-gray-800 bg-white overflow-x-hidden">
     
-    <!-- 1. HERO SECTION -->
-    <section class="hero-section relative h-[85vh] min-h-[600px] flex items-center">
-      <div class="absolute inset-0 z-0">
-        <img :src="heroImg" class="w-full h-full object-cover scale-105" />
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/80 to-orange-900/40"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(249,115,22,0.18),transparent_55%)]"></div>
+    <!-- 1. HERO SECTION — Light theme with animated mascot & gradients -->
+    <section class="relative min-h-[90vh] flex items-center overflow-hidden bg-white">
+      <!-- layered backdrop (white + orange/red gradients) -->
+      <div class="absolute inset-0">
+        <div class="absolute inset-0 opacity-[0.4]" style="background-image:radial-gradient(#f97316 1px,transparent 1px);background-size:40px 40px;-webkit-mask-image:radial-gradient(ellipse 100% 100% at 50% 50%,#000,transparent);mask-image:radial-gradient(ellipse 100% 100% at 50% 50%,#000,transparent)"></div>
+        <div class="absolute -top-40 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-orange-400/30 to-red-500/20 blur-[100px] rounded-full animate-pulse" style="animation-duration: 4s;"></div>
+        <div class="absolute -bottom-40 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-red-500/20 to-orange-400/20 blur-[100px] rounded-full animate-pulse" style="animation-duration: 5s; animation-delay: 2s;"></div>
       </div>
-      
-      <div class="container relative z-10 max-w-7xl mx-auto px-6 pt-24">
-        <div class="grid lg:grid-cols-2 gap-12 items-center">
-          <div class="text-white reveal">
-            <div class="flex items-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-6">
-              <span class="w-8 h-0.5 bg-orange-500"></span> Company Profile · JAGAYA
-            </div>
-            <h1 class="text-5xl lg:text-7xl font-bold leading-[1.1] mb-6">
-              Teknologi untuk<br>Kemanusiaan Demak.
-            </h1>
-            <p class="text-gray-300 text-lg mb-8 max-w-lg">
-              JAGAYA adalah ekosistem digital tanggap bencana yang menyatukan pemerintah, relawan, dan masyarakat dalam satu komando — cepat, transparan, dan terukur.
-            </p>
-            <div class="flex items-center gap-6 flex-wrap">
-              <a href="#visi-misi" class="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-8 py-4 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-orange-500/30 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-orange-500/40">
-                Kenali Kami <ChevronRightIcon class="w-5 h-5"/>
-              </a>
-              <div class="flex items-center gap-4">
-                <div class="flex -space-x-4">
-                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80" class="w-12 h-12 rounded-full border-2 border-slate-900 object-cover"/>
-                  <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80" class="w-12 h-12 rounded-full border-2 border-slate-900 object-cover"/>
-                  <div class="w-12 h-12 rounded-full border-2 border-slate-900 bg-orange-500 flex items-center justify-center text-white font-bold text-xs">4.9</div>
-                </div>
-                <div class="text-sm">
-                  <p class="font-bold">Dipercaya Oleh</p>
-                  <p class="text-gray-400">12k+ Pengguna</p>
-                </div>
-              </div>
+
+      <!-- Mascot Animation -->
+      <div class="absolute right-0 top-1/2 z-20" style="animation: mascotPop 8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;">
+        <div class="relative w-32 h-32 md:w-48 md:h-48 drop-shadow-[0_20px_30px_rgba(249,115,22,0.3)]" style="animation: float 3s ease-in-out infinite;">
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+            <circle cx="100" cy="100" r="60" fill="white" stroke="#f97316" stroke-width="8"/>
+            <!-- Eyes -->
+            <rect x="75" y="85" width="12" height="20" rx="6" fill="#ef4444"/>
+            <rect x="113" y="85" width="12" height="20" rx="6" fill="#ef4444"/>
+            <!-- Smile -->
+            <path d="M75 125 Q100 145 125 125" stroke="#f97316" stroke-width="8" stroke-linecap="round"/>
+            <!-- Antenna -->
+            <line x1="100" y1="40" x2="100" y2="15" stroke="#f97316" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="100" cy="15" r="8" fill="#ef4444" class="animate-ping" style="transform-origin: 100px 15px; animation-duration: 1s;"/>
+            <circle cx="100" cy="15" r="8" fill="#ef4444"/>
+            <!-- Wings / Propellers -->
+            <path d="M40 100 Q15 90 25 70 Q45 80 40 100" fill="#f97316"/>
+            <path d="M160 100 Q185 90 175 70 Q155 80 160 100" fill="#f97316"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="container relative z-10 max-w-7xl mx-auto px-6 pt-28 pb-16 text-center">
+        <div class="reveal max-w-4xl mx-auto">
+          <!-- badge -->
+          <div class="inline-flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 mb-8 rounded-full bg-white border border-orange-200 shadow-sm hover:scale-105 transition-transform cursor-default">
+            <span class="px-2.5 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-black uppercase tracking-widest shadow-sm">v2026</span>
+            <span class="text-[12px] font-bold tracking-wide text-orange-600">Platform Tanggap Bencana Cerdas</span>
+          </div>
+          <!-- headline -->
+          <h1 class="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.04] tracking-tight mb-7 drop-shadow-sm">
+            Teknologi untuk<br>Kemanusiaan <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Demak</span>.
+          </h1>
+          <!-- subtitle -->
+          <p class="text-slate-600 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mx-auto mb-10">
+            Ekosistem digital tanggap bencana generasi 2026 — didukung AI, sensor IoT, dan data real-time yang menyatukan pemerintah, relawan, dan masyarakat dalam satu komando.
+          </p>
+          <!-- CTAs -->
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="#visi-misi" class="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold transition-all hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30 inline-flex items-center justify-center gap-2">
+              Kenali Kami <ChevronRightIcon class="w-5 h-5"/>
+            </a>
+            <a href="#kondisi-demak" class="w-full sm:w-auto px-8 py-4 rounded-full bg-white border-2 border-orange-100 text-orange-600 font-bold transition-all hover:border-orange-500 hover:bg-orange-50 inline-flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+              Lihat Kondisi Demak
+            </a>
+          </div>
+        </div>
+
+        <!-- elegant stat module (light theme) -->
+        <div class="reveal mt-16 max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-px rounded-3xl overflow-hidden bg-slate-200 border border-slate-200 shadow-xl shadow-orange-500/5 relative z-30" style="transition-delay:0.15s">
+          <div v-for="(s, i) in [
+            { v: '14', sub: 'Kecamatan' },
+            { v: '24/7', sub: 'Pemantauan' },
+            { v: '&lt;5 mnt', sub: 'Respons Darurat' },
+            { v: '4.9', sub: 'Penilaian Pengguna' }
+          ]" :key="i" class="bg-white px-6 py-8 hover:bg-orange-50 transition-colors group">
+            <p class="text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 tabular-nums transform group-hover:scale-110 transition-transform origin-bottom" v-html="s.v"></p>
+            <p class="text-[11px] font-bold uppercase tracking-widest text-slate-500 mt-2">{{ s.sub }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. ABOUT US SECTION — Bento -->
+    <section class="relative py-28 lg:py-32 overflow-hidden bg-slate-50">
+      <!-- faint grid texture -->
+      <div class="absolute inset-0 pointer-events-none" style="background-image:linear-gradient(#e2e8f0 1px,transparent 1px),linear-gradient(90deg,#e2e8f0 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(ellipse 75% 55% at 50% 38%,#000,transparent);mask-image:radial-gradient(ellipse 75% 55% at 50% 38%,#000,transparent)"></div>
+
+      <div class="container max-w-7xl mx-auto px-6 relative z-10">
+        <!-- header -->
+        <div class="max-w-3xl mx-auto mb-16 text-center reveal">
+          <div class="flex items-center justify-center gap-3 text-orange-600 font-bold tracking-[0.25em] text-xs uppercase mb-5">
+            <span class="w-10 h-px bg-orange-500"></span> Tentang Kami <span class="w-10 h-px bg-orange-500"></span>
+          </div>
+          <h2 class="text-4xl lg:text-6xl font-black text-slate-900 leading-[1.05] tracking-tight">
+            Lebih dekat dengan orang<br class="hidden sm:block"> di balik <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">JAGAYA</span>.
+          </h2>
+        </div>
+
+        <!-- bento grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 reveal" style="transition-delay:0.1s">
+
+          <!-- founder photo (tall) -->
+          <div @click="showFounderModal = true" class="lg:col-span-5 lg:row-span-2 relative rounded-[28px] overflow-hidden min-h-[360px] group cursor-pointer shadow-xl hover:shadow-orange-500/20 transition-all">
+            <img :src="fotoImg" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-105" />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/15 to-transparent"></div>
+            <span class="absolute top-5 left-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur text-white text-[11px] font-bold uppercase tracking-widest border border-white/25">Founder</span>
+            <div class="absolute bottom-0 left-0 p-7">
+              <p class="text-2xl font-bold text-white">M. Ananda Hariadi</p>
+              <p class="text-orange-400 font-semibold text-sm mt-1">Pendiri &amp; Lead Developer</p>
             </div>
           </div>
-          
-          <div class="hidden lg:block relative reveal" style="transition-delay: 0.2s">
-            <div class="bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-lg max-w-sm ml-auto">
-              <h3 class="text-xl font-bold text-white mb-4">Lacak Distribusi Bantuan</h3>
-              <p class="text-gray-300 text-sm mb-6">Pantau pergerakan armada logistik secara real-time dari gudang ke titik pengungsian.</p>
-              <div class="bg-white p-2 rounded flex">
-                <input type="text" placeholder="Masukkan ID Resi..." class="flex-1 outline-none px-3 text-sm text-gray-800" />
-                <button class="bg-orange-500 text-white px-6 py-3 rounded text-sm font-bold">Lacak</button>
-              </div>
+
+          <!-- quote / intro (white) -->
+          <div class="lg:col-span-7 bg-white rounded-[28px] border border-slate-100 p-9 lg:p-11 flex flex-col justify-center shadow-[0_20px_50px_-30px_rgba(15,23,42,0.3)]">
+            <p class="text-2xl lg:text-[1.7rem] font-medium text-slate-800 leading-snug tracking-tight">
+              <span class="text-orange-500 font-serif text-4xl leading-none mr-1 align-[-0.15em]">“</span>Teknologi harus hadir paling cepat justru saat manusia paling membutuhkannya.”
+            </p>
+            <p class="text-gray-500 mt-6 leading-relaxed">
+              JAGAYA lahir dari satu keyakinan sederhana: setiap detik berarti dalam bencana. Kami menyatukan data lapangan, sensor IoT, dan relawan ke dalam satu sistem yang transparan untuk Kabupaten Demak.
+            </p>
+            <a href="#visi-misi" class="mt-7 inline-flex items-center gap-2 text-slate-900 font-bold text-sm self-start border-b-2 border-orange-500 pb-1 hover:gap-3 transition-all">
+              Baca kisah selengkapnya <ArrowRightIcon class="w-4 h-4 text-orange-500"/>
+            </a>
+          </div>
+
+          <!-- dark mission card -->
+          <div class="lg:col-span-4 relative rounded-[28px] bg-slate-950 p-8 overflow-hidden text-white flex flex-col justify-between min-h-[210px]">
+            <div class="absolute -bottom-12 -right-12 w-44 h-44 rounded-full bg-orange-600/20 blur-2xl"></div>
+            <ShieldCheckIcon class="w-9 h-9 text-orange-400 relative"/>
+            <div class="relative">
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-500 mb-2">Misi Kami</p>
+              <p class="text-[15px] font-semibold leading-relaxed text-gray-100">Menjadi tulang punggung digital penanggulangan bencana yang menyelamatkan lebih banyak nyawa.</p>
+            </div>
+          </div>
+
+          <!-- stat card -->
+          <div class="lg:col-span-3 bg-white rounded-[28px] border border-slate-100 p-8 flex flex-col justify-center shadow-[0_20px_50px_-30px_rgba(15,23,42,0.3)]">
+            <p class="text-6xl font-black text-slate-900 leading-none tracking-tight">14</p>
+            <p class="text-sm font-semibold text-gray-500 mt-3 leading-snug">Kecamatan se-Demak terpantau penuh</p>
+            <div class="mt-4 h-1 w-12 rounded-full bg-orange-500"></div>
+          </div>
+        </div>
+
+        <!-- feature row -->
+        <div class="grid sm:grid-cols-3 gap-5 mt-5 reveal" style="transition-delay:0.2s">
+          <div v-for="(f, i) in [
+            { icon: GlobeAltIcon, t: 'Jangkauan Luas', d: 'Mencakup seluruh 14 kecamatan Kabupaten Demak.' },
+            { icon: ClockIcon, t: 'Dukungan 24/7', d: 'Tim komando siaga penuh di setiap detik krisis.' },
+            { icon: CheckCircleIcon, t: 'Transparan', d: 'Tersinkronisasi penuh dengan BNPB & BPBD Jateng.' }
+          ]" :key="i" class="bg-white rounded-2xl border border-slate-100 p-6 flex items-start gap-4 hover:border-orange-200 transition-colors shadow-[0_20px_50px_-35px_rgba(15,23,42,0.35)]">
+            <div class="w-11 h-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+              <component :is="f.icon" class="w-5 h-5"/>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900">{{ f.t }}</h4>
+              <p class="text-sm text-gray-500 mt-1 leading-relaxed">{{ f.d }}</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 2. ABOUT US SECTION -->
-    <section class="py-24">
-      <div class="container max-w-7xl mx-auto px-6">
-        <div class="grid lg:grid-cols-2 gap-16 items-center">
-          <div class="reveal">
-            <div class="flex items-center gap-3 text-orange-500 font-bold tracking-widest text-xs uppercase mb-4">
-              <span class="w-8 h-0.5 bg-orange-500"></span> Tentang Kami
-            </div>
-            <h2 class="text-4xl lg:text-5xl font-bold text-slate-900 leading-tight mb-6">
-              Didorong oleh Kepercayaan,<br>Ditenagai oleh <span class="bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">Inovasi.</span>
-            </h2>
-            <p class="text-gray-500 mb-8 leading-relaxed">
-              JAGAYA adalah ekosistem digital terpadu yang memadukan keahlian lapangan dan teknologi modern. Kami berdedikasi untuk memberikan ketenangan pikiran melalui sistem penanganan krisis yang transparan.
-            </p>
-            <div class="grid sm:grid-cols-2 gap-8 mb-8">
-              <div class="flex gap-4">
-                <div class="w-12 h-12 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500 shrink-0"><GlobeAltIcon class="w-6 h-6"/></div>
-                <div>
-                  <h4 class="font-bold text-slate-900">Jangkauan Luas</h4>
-                  <p class="text-sm text-gray-500 mt-1">Mengcover seluruh 14 kecamatan Demak.</p>
-                </div>
-              </div>
-              <div class="flex gap-4">
-                <div class="w-12 h-12 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500 shrink-0"><PhoneIcon class="w-6 h-6"/></div>
-                <div>
-                  <h4 class="font-bold text-slate-900">Dukungan 24/7</h4>
-                  <p class="text-sm text-gray-500 mt-1">Tim siaga penuh setiap saat.</p>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center gap-6 pt-6 border-t border-gray-100">
-              <button class="bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded font-bold transition-colors">
-                Baca Selengkapnya
-              </button>
-              <div class="flex items-center gap-4">
-                <img :src="fotoImg" class="w-14 h-14 rounded-full object-cover border-2 border-orange-500"/>
-                <div>
-                  <p class="font-bold text-slate-900">M. Ananda Hariadi</p>
-                  <p class="text-sm text-orange-500 font-bold">Founder JAGAYA</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="relative reveal" style="transition-delay: 0.2s">
-            <div class="absolute -inset-4 bg-orange-100 rounded-lg transform rotate-3"></div>
-            <img :src="fotoImg" class="relative w-full h-[600px] object-cover rounded-lg shadow-xl" />
-            <div class="absolute top-1/2 -translate-y-1/2 -left-8 w-32 h-32 bg-white rounded-full shadow-2xl flex items-center justify-center border-4 border-white animate-spin-slow">
-              <div class="text-center">
-                <p class="text-3xl font-black text-orange-500">5+</p>
-                <p class="text-[10px] font-bold uppercase text-slate-900 tracking-wider">Tahun<br>Pengalaman</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- 2b. STATS COUNTER STRIP -->
     <section id="dev-stats" class="py-16 bg-white border-t border-gray-100 reveal">
@@ -529,16 +605,13 @@ onMounted(() => {
           <div class="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none"></div>
           
           <div class="marquee-content flex gap-8 w-max">
-            <!-- 7 Items Clean Elegant Style -->
-<div v-for="n in 7" :key="n"
-              @click="openLightbox(n === 2 ? awardsImg.presiden : n === 3 ? awardsImg.nasional : n === 4 ? awardsImg.inovasiAi : n === 7 ? awardsImg.kemanusiaan : awardsImg.default, ['Penghargaan Inovasi Nasional', 'Apresiasi Presiden RI', 'Audiensi Menteri Sosial', 'Pemaparan RUU DPR', 'Delegasi Internasional', 'Award Teknologi AI', 'Penghargaan Kemanusiaan'][n - 1])"
+            <!-- Primary items -->
+            <div v-for="(award, i) in awards" :key="i"
+              @click="openLightbox(award.img, award.title)"
               class="w-96 flex-shrink-0 bg-white p-6 border-2 border-slate-100 rounded-xl group hover:shadow-2xl transition-all cursor-pointer relative overflow-hidden hover:border-orange-200">
               <div class="aspect-[4/3] overflow-hidden mb-6 relative rounded-xl bg-gray-50 shadow-inner">
-<!-- Item ke-2 = Apresiasi Presiden RI -->
-                <!-- Item ke-7 = Penghargaan Kemanusiaan -->
-                <!-- Item ke-4 = Audiensi Internasional (biar tidak ada bintang terlihat) -->
                 <img
-                  :src="n === 2 ? awardsImg.presiden : n === 3 ? awardsImg.nasional : n === 4 ? awardsImg.inovasiAi : n === 7 ? awardsImg.kemanusiaan : awardsImg.default"
+                  :src="award.img"
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   style="transform: scale(1.12)"
                 />
@@ -547,24 +620,24 @@ onMounted(() => {
                 </div>
               </div>
               <div class="text-center">
-                <h4 class="font-black text-slate-900 text-lg leading-tight mb-2">
-                  {{ ['Penghargaan Inovasi Nasional', 'Apresiasi Presiden RI', 'Audiensi Menteri Sosial', 'Pemaparan RUU DPR', 'Delegasi Internasional', 'Award Teknologi AI', 'Penghargaan Kemanusiaan'][n - 1] }}
-                </h4>
-                <p class="text-orange-500 text-sm font-bold tracking-widest uppercase">Tahun {{ 2026 - (n % 3) }}</p>
+                <h4 class="font-black text-slate-900 text-lg leading-tight mb-2">{{ award.title }}</h4>
+                <p class="text-orange-500 text-sm font-bold tracking-widest uppercase">Tahun {{ award.year }}</p>
               </div>
             </div>
             
-            <!-- Duplicated 7 Items for seamless looping -->
-            <div v-for="n in 7" :key="'dup-'+n" class="w-96 flex-shrink-0 bg-white p-6 border-2 border-slate-100 rounded-xl group hover:shadow-2xl transition-all cursor-pointer relative overflow-hidden hover:border-blue-200">
+            <!-- Duplicated items for seamless marquee looping -->
+            <div v-for="(award, i) in awards" :key="'dup-'+i"
+              @click="openLightbox(award.img, award.title)"
+              class="w-96 flex-shrink-0 bg-white p-6 border-2 border-slate-100 rounded-xl group hover:shadow-2xl transition-all cursor-pointer relative overflow-hidden hover:border-orange-200">
               <div class="aspect-[4/3] overflow-hidden mb-6 relative rounded-xl bg-gray-50 shadow-inner">
-                <img :src="fotoImg" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <img :src="award.img" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" style="transform: scale(1.12)" />
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                  <span class="text-white text-xs font-bold bg-white/15 border border-white/30 backdrop-blur px-3 py-1.5 rounded-full">Klik untuk perbesar</span>
+                </div>
               </div>
               <div class="text-center">
-                <h4 class="font-black text-slate-900 text-lg leading-tight mb-2">
-                  {{ ['Penghargaan Inovasi Nasional', 'Apresiasi Presiden RI', 'Audiensi Menteri Sosial', 'Pemaparan RUU DPR', 'Delegasi Internasional', 'Award Teknologi AI', 'Penghargaan Kemanusiaan'][n - 1] }}
-                </h4>
-                <p class="text-orange-500 text-sm font-bold tracking-widest uppercase">Tahun {{ 2026 - (n % 3) }}</p>
+                <h4 class="font-black text-slate-900 text-lg leading-tight mb-2">{{ award.title }}</h4>
+                <p class="text-orange-500 text-sm font-bold tracking-widest uppercase">Tahun {{ award.year }}</p>
               </div>
             </div>
           </div>
@@ -615,10 +688,8 @@ onMounted(() => {
         <div class="footer-grid">
           <div class="footer-brand">
             <div class="footer-logo">
-              <div class="footer-logo-icon">
-                <ShieldCheckIcon class="w-5 h-5 text-white"/>
-              </div>
-              <span>JAGAYA</span>
+              <img :src="logoImg" alt="JAGAYA" style="height:48px; width:auto; object-fit:contain" />
+              <span style="font-size: 24px;">JAGAYA</span>
             </div>
             <p class="footer-desc">Platform manajemen krisis bencana terpadu untuk Kabupaten Demak. Cepat, transparan, dan terkoordinasi.</p>
             <div class="footer-socials">
@@ -638,7 +709,7 @@ onMounted(() => {
             <p class="footer-heading">Kontak</p>
             <ul class="footer-contact">
               <li>Jl. Pemuda No.1, Demak</li>
-              <li>+62 291-685 000</li>
+              <li>+999</li>
               <li>info@jagaya.id</li>
             </ul>
           </div>
@@ -657,6 +728,52 @@ onMounted(() => {
         <div class="dev-lightbox__inner">
           <img :src="lightboxImg" :alt="lightboxTitle" />
           <p class="dev-lightbox__caption">{{ lightboxTitle }}</p>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Founder Modal (Premium Clean Redesign) -->
+    <transition name="dev-fade">
+      <div v-if="showFounderModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" @click="showFounderModal = false"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col sm:flex-row transform transition-all">
+          
+          <!-- Close Button -->
+          <button @click="showFounderModal = false" class="absolute top-4 right-4 z-50 w-10 h-10 bg-white/20 hover:bg-white/40 sm:bg-black/5 sm:hover:bg-black/10 backdrop-blur-md rounded-full flex items-center justify-center text-white sm:text-slate-500 hover:scale-105 transition-all">
+            <XMarkIcon class="w-6 h-6" />
+          </button>
+
+          <!-- Left: Photo -->
+          <div class="sm:w-5/12 relative h-64 sm:h-auto shrink-0">
+            <img :src="fotoImg" class="absolute inset-0 w-full h-full object-cover" alt="M. Ananda Hariadi" />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent sm:hidden"></div>
+          </div>
+          
+          <!-- Right: Content -->
+          <div class="sm:w-7/12 p-8 sm:p-12 flex flex-col justify-center bg-white relative">
+            <div class="mb-5">
+              <h3 class="text-3xl font-black text-slate-900 tracking-tight">M. Ananda Hariadi</h3>
+              <p class="text-orange-600 font-bold tracking-widest uppercase text-xs mt-2">Founder & Lead Developer</p>
+            </div>
+            
+            <div class="w-12 h-1.5 bg-orange-500 rounded-full mb-6"></div>
+            
+            <p class="text-slate-600 leading-relaxed text-[15px] mb-8">
+              Mahasiswa Semester 4 Informatika di UPN "Veteran" Jawa Timur. Berdedikasi tinggi dalam merancang dan mengembangkan sistem teknologi cerdas yang dapat memberikan solusi nyata serta dampak positif bagi penanggulangan bencana di masyarakat luas.
+            </p>
+            
+            <div class="flex items-center gap-4">
+              <a href="https://www.instagram.com/anandahariadi_/" target="_blank" class="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border-2 border-slate-100 text-slate-600 font-bold hover:border-orange-500 hover:bg-orange-50 hover:text-orange-600 transition-all">
+                Instagram
+              </a>
+              <a href="https://www.linkedin.com/in/anandahariadi/" target="_blank" class="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border-2 border-slate-100 text-slate-600 font-bold hover:border-orange-500 hover:bg-orange-50 hover:text-orange-600 transition-all">
+                LinkedIn
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </transition>
@@ -699,6 +816,17 @@ onMounted(() => {
 .dev-acc-enter-active,.dev-acc-leave-active{transition:all .3s ease;overflow:hidden}
 .dev-acc-enter-from,.dev-acc-leave-to{opacity:0;max-height:0;margin-top:0}
 .dev-acc-enter-to,.dev-acc-leave-from{opacity:1;max-height:200px}
+
+/* Mascot Animations */
+@keyframes mascotPop {
+  0%, 10% { transform: translateX(150%) translateY(-50%); }
+  25%, 75% { transform: translateX(-10%) translateY(-50%); }
+  90%, 100% { transform: translateX(150%) translateY(-50%); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
 
 /* Lightbox */
 .dev-lightbox{

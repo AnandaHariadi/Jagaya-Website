@@ -16,6 +16,8 @@ import {
   LineElement, BarElement, Title, Tooltip, Legend, ArcElement, Filler
 } from 'chart.js'
 import { Line, Doughnut } from 'vue-chartjs'
+import 'leaflet/dist/leaflet.css'
+import { LMap, LTileLayer, LCircleMarker, LPopup } from '@vue-leaflet/vue-leaflet'
 
 // Asset images
 import heroImg from '../assets/flood_hero.png'
@@ -26,6 +28,7 @@ import evacuationImg from '../assets/flood_evacuation.png'
 import communityImg from '../assets/flood_community.png'
 import bridgeImg from '../assets/flood_bridge.png'
 import techImg from '../assets/about_technology.png'
+import logoImg from '../assets/logo-jagaya.png'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler)
 
@@ -60,14 +63,14 @@ const lineData = {
   labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
   datasets: [{
     data: [120, 158, 185, 215, 192, 168, 143],
-    borderColor: '#2563eb',
+    borderColor: '#f97316',
     backgroundColor: ctx => {
       const g = ctx.chart.ctx.createLinearGradient(0,0,0,160)
-      g.addColorStop(0,'rgba(37,99,235,.3)'); g.addColorStop(1,'rgba(37,99,235,0)')
+      g.addColorStop(0,'rgba(249,115,22,.3)'); g.addColorStop(1,'rgba(249,115,22,0)')
       return g
     },
     tension: 0.45, fill: true,
-    pointBackgroundColor: '#2563eb', pointBorderColor:'#fff', pointBorderWidth:2, pointRadius:4, pointHoverRadius:6
+    pointBackgroundColor: '#f97316', pointBorderColor:'#fff', pointBorderWidth:2, pointRadius:4, pointHoverRadius:6
   }]
 }
 const lineOpts = {
@@ -80,7 +83,7 @@ const lineOpts = {
 }
 const donutData = {
   labels: ['Makanan','Obat-obatan','Pakaian','Air Bersih'],
-  datasets:[{ data:[40,20,15,25], backgroundColor:['#4338ca','#2563eb','#0ea5e9','#38bdf8'], borderWidth:0, hoverOffset:6 }]
+  datasets:[{ data:[40,20,15,25], backgroundColor:['#dc2626','#f97316','#fbbf24','#fb923c'], borderWidth:0, hoverOffset:6 }]
 }
 const donutOpts = {
   responsive:true, maintainAspectRatio:false, cutout:'72%',
@@ -104,7 +107,7 @@ const infraFeatures = [
     title: 'Pemetaan Real-time',
     desc: 'Pantau pergerakan air, titik evakuasi, dan status keamanan wilayah terdampak secara langsung dari peta interaktif dengan update data setiap 5 menit.',
     badges: ['Update 5 menit', 'Multi-layer', 'GPS Tracking'],
-    color: 'from-indigo-700 to-blue-600',
+    color: 'from-red-600 to-orange-500',
     link: '/pengungsian',
     img: heroImg,
   },
@@ -113,7 +116,7 @@ const infraFeatures = [
     title: 'Distribusi Logistik',
     desc: 'Sistem manajemen gudang cerdas untuk memastikan bantuan donasi tepat sasaran ke posko yang paling membutuhkan.',
     badges: ['Smart Routing', 'Stok Realtime', 'Tepat Sasaran'],
-    color: 'from-blue-600 to-cyan-400',
+    color: 'from-orange-500 to-amber-400',
     link: '/donasi',
     img: logisticsImg,
   },
@@ -122,7 +125,7 @@ const infraFeatures = [
     title: 'Koordinasi Relawan',
     desc: 'Database terpusat untuk memobilisasi personel evakuasi dan medis ke titik krisis dengan komunikasi satu pintu.',
     badges: ['1,200+ Relawan', 'Dispatch Otomatis', 'Chat Terpadu'],
-    color: 'from-indigo-600 to-indigo-400',
+    color: 'from-red-500 to-rose-500',
     link: '/relawan',
     img: volunteersImg,
   },
@@ -131,7 +134,7 @@ const infraFeatures = [
     title: 'Sistem Peringatan Dini',
     desc: 'Notifikasi otomatis ke seluruh warga dan relawan ketika level air mencapai ambang batas bahaya.',
     badges: ['Auto Alert', 'SMS Broadcast', 'Push Notification'],
-    color: 'from-cyan-500 to-sky-400',
+    color: 'from-amber-500 to-yellow-400',
     link: '/dashboard',
     img: bridgeImg,
   },
@@ -140,7 +143,7 @@ const infraFeatures = [
     title: 'Manajemen Pengungsian',
     desc: 'Kelola data pengungsi, kapasitas posko, dan kebutuhan logistik di setiap titik pengungsian.',
     badges: ['Data Pengungsi', 'Kapasitas Posko', 'Kebutuhan Logistik'],
-    color: 'from-indigo-500 to-indigo-700',
+    color: 'from-rose-500 to-red-600',
     link: '/pengungsian',
     img: evacuationImg,
   },
@@ -163,6 +166,20 @@ const gallery = [
   { src: communityImg, tag: 'Komunitas', title: 'Gotong Royong Warga',     span: 'col-span-1 row-span-1' },
 ]
 
+/* ── PETA PEMANTAUAN WILAYAH DEMAK ───────────────────────── */
+const petaZoom = ref(11)
+const petaCenter = ref([-6.8953, 110.6386])
+const petaOptions = { zoomControl: false, scrollWheelZoom: false, attributionControl: false }
+const wilayahKondisi = ref([
+  { id: 1, nama: 'Sayung',      lat: -6.9320, lng: 110.4760, status: 'Kritis',  tma: '120 cm', warga: 3200 },
+  { id: 2, nama: 'Karanganyar', lat: -6.9180, lng: 110.6080, status: 'Kritis',  tma: '95 cm',  warga: 2800 },
+  { id: 3, nama: 'Mijen',       lat: -6.8120, lng: 110.7350, status: 'Waspada', tma: '60 cm',  warga: 1500 },
+  { id: 4, nama: 'Gajah',       lat: -6.8900, lng: 110.7700, status: 'Waspada', tma: '45 cm',  warga: 980  },
+  { id: 5, nama: 'Demak Kota',  lat: -6.8907, lng: 110.6370, status: 'Aman',    tma: '15 cm',  warga: 600  },
+  { id: 6, nama: 'Wonosalam',   lat: -6.9540, lng: 110.6720, status: 'Aman',    tma: '10 cm',  warga: 300  },
+])
+const petaColor = (s) => s === 'Kritis' ? '#ef4444' : s === 'Waspada' ? '#f59e0b' : '#22c55e'
+
 /* ── TESTIMONIALS ────────────────────────────────────────── */
 const testimonials = [
   { name:'Budi Santoso', role:'Relawan PMI Demak',    text:'Platform ini sangat membantu koordinasi kami di lapangan. Informasi selalu akurat dan cepat.', rating: 5 },
@@ -179,6 +196,18 @@ const activeInfra = ref(0)
 
 /* ── VIDEO MODAL ─────────────────────────────────────────── */
 const showVideo = ref(false)
+
+/* ── CCTV 24 JAM KOTA DEMAK ───────────────────────────────
+   Embed YouTube live (mute+autoplay agar bisa berjalan otomatis).
+   Ganti `src` dengan URL stream CCTV asli bila tersedia. */
+const cctvFeeds = [
+  { label: 'Alun-Alun Simpang Enam',  lokasi: 'Pusat Kota Demak',      src: 'https://www.youtube.com/embed/Cn3yyH-KTOE?rel=0&modestbranding=1&autoplay=1&mute=1' },
+  { label: 'Masjid Agung Demak',      lokasi: 'Kauman, Demak Kota',    src: 'https://www.youtube.com/embed/GHuRrOnW2MQ?rel=0&modestbranding=1&autoplay=1&mute=1' },
+  { label: 'Jl. Sultan Fatah',        lokasi: 'Jalur Utama Demak',     src: 'https://www.youtube.com/embed/A2Lgrc0B4Rw?rel=0&modestbranding=1&autoplay=1&mute=1' },
+  { label: 'Kawasan Sayung',          lokasi: 'Kec. Sayung',           src: 'https://www.youtube.com/embed/dY070ndSob0?rel=0&modestbranding=1&autoplay=1&mute=1' },
+  { label: 'Karanganyar',             lokasi: 'Titik Rawan Banjir',    src: 'https://www.youtube.com/embed/Cn3yyH-KTOE?rel=0&modestbranding=1&autoplay=1&mute=1' },
+  { label: 'Jalur Pantura',           lokasi: 'Gerbang Demak',         src: 'https://www.youtube.com/embed/A2Lgrc0B4Rw?rel=0&modestbranding=1&autoplay=1&mute=1' },
+]
 </script>
 
 <template>
@@ -252,15 +281,15 @@ const showVideo = ref(false)
               </div>
               <div>
                 <p class="float-card-label">Status Area</p>
-                <p class="float-card-value">Karanganyar: <span class="text-indigo-600">Kritis</span></p>
+                <p class="float-card-value">Karanganyar: <span class="text-red-500">Kritis</span></p>
               </div>
             </div>
 
             <!-- Floating card: relawan -->
             <div class="float-card float-card-relawan animate-float-slow">
               <div class="avatar-stack">
-                <img class="avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&q=80" alt=""/>
-                <img class="avatar" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&q=80" alt=""/>
+                <img class="avatar" src="https://ui-avatars.com/api/?name=User+1&background=f97316&color=fff" alt=""/>
+                <img class="avatar" src="https://ui-avatars.com/api/?name=User+2&background=dc2626&color=fff" alt=""/>
                 <div class="avatar avatar-more">+1K</div>
               </div>
               <div>
@@ -295,11 +324,11 @@ const showVideo = ref(false)
       <div class="container">
         <p class="partners-label">Didukung Oleh</p>
         <div class="partners-row">
-          <span class="partner-item"><ShieldCheckIcon class="w-6 h-6 text-indigo-600"/>BNPB</span>
-          <span class="partner-item"><HomeIcon class="w-6 h-6 text-blue-600"/>Pemkab Demak</span>
-          <span class="partner-item"><UsersIcon class="w-6 h-6 text-indigo-500"/>Relawan Indonesia</span>
-          <span class="partner-item"><HeartIcon class="w-6 h-6 text-blue-500"/>PMI</span>
-          <span class="partner-item"><MapPinIcon class="w-6 h-6 text-indigo-600"/>BPBD Jateng</span>
+          <span class="partner-item"><ShieldCheckIcon class="w-6 h-6 text-red-500"/>BNPB</span>
+          <span class="partner-item"><HomeIcon class="w-6 h-6 text-orange-500"/>Pemkab Demak</span>
+          <span class="partner-item"><UsersIcon class="w-6 h-6 text-red-400"/>Relawan Indonesia</span>
+          <span class="partner-item"><HeartIcon class="w-6 h-6 text-orange-400"/>PMI</span>
+          <span class="partner-item"><MapPinIcon class="w-6 h-6 text-red-500"/>BPBD Jateng</span>
         </div>
       </div>
     </section>
@@ -309,9 +338,9 @@ const showVideo = ref(false)
       <div class="container">
         <div class="features-grid reveal opacity-0">
           <div v-for="f in [
-            { icon:ShieldCheckIcon, title:'Tim Ahli Terlatih',    desc:'Koordinator berpengalaman siap 24 jam di setiap titik kritis wilayah terdampak.', color:'text-indigo-700' },
-            { icon:BellAlertIcon,   title:'Respons Cepat 24/7',   desc:'Sistem notifikasi otomatis memastikan tidak ada kejadian darurat yang terlewat.',  color:'text-blue-600' },
-            { icon:CurrencyDollarIcon, title:'Donasi Transparan', desc:'Setiap rupiah tercatat dan dapat dilacak penyalurannya secara real-time.',          color:'text-cyan-500' },
+            { icon:ShieldCheckIcon, title:'Tim Ahli Terlatih',    desc:'Koordinator berpengalaman siap 24 jam di setiap titik kritis wilayah terdampak.', color:'text-red-600' },
+            { icon:BellAlertIcon,   title:'Respons Cepat 24/7',   desc:'Sistem notifikasi otomatis memastikan tidak ada kejadian darurat yang terlewat.',  color:'text-orange-500' },
+            { icon:CurrencyDollarIcon, title:'Donasi Transparan', desc:'Setiap rupiah tercatat dan dapat dilacak penyalurannya secara real-time.',          color:'text-amber-500' },
           ]" :key="f.title"
           class="feature-strip-card group">
             <div class="feature-strip-icon">
@@ -375,7 +404,7 @@ const showVideo = ref(false)
                 <h4>{{ f.title }}</h4>
                 <p v-if="activeInfra === i">{{ f.desc }}</p>
               </div>
-              <ChevronRightIcon v-if="activeInfra === i" class="w-4 h-4 text-blue-600 flex-shrink-0" />
+              <ChevronRightIcon v-if="activeInfra === i" class="w-4 h-4 text-orange-500 flex-shrink-0" />
             </button>
           </div>
 
@@ -426,7 +455,7 @@ const showVideo = ref(false)
             { val: counts[3], suffix:'M', label:'Total Donasi (Rp)',   sub:'Dari seluruh Indonesia', icon: CurrencyDollarIcon },
           ]" :key="i" class="stat-card">
             <div class="stat-icon-wrap">
-              <component :is="s.icon" class="w-6 h-6 text-blue-600" />
+              <component :is="s.icon" class="w-6 h-6 text-orange-500" />
             </div>
             <p class="stat-num">
               {{ s.val.toLocaleString('id') }}<span class="stat-suffix">{{ s.suffix }}</span>
@@ -489,12 +518,45 @@ const showVideo = ref(false)
           </router-link>
         </div>
 
-        <!-- Bento grid -->
+        <!-- CCTV 24 JAM — 6 feed Kota Demak -->
+        <div class="cctv-block">
+          <div class="cctv-block-header">
+            <h3 class="cctv-block-title">
+              <SignalIcon class="w-5 h-5 text-red-500" /> CCTV Pantau 24 Jam · Kota Demak
+            </h3>
+            <span class="live-tag">{{ cctvFeeds.length }} Titik Live</span>
+          </div>
+          <div class="cctv-grid">
+            <div v-for="(c, i) in cctvFeeds" :key="i" class="cctv-card">
+              <div class="cctv-frame">
+                <iframe
+                  :src="c.src"
+                  :title="`CCTV ${c.label}`"
+                  loading="lazy"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                ></iframe>
+                <span class="cctv-live">
+                  <span class="badge-dot"><span class="badge-ping"></span><span class="badge-core" style="background:#ef4444"></span></span>
+                  LIVE
+                </span>
+                <span class="cctv-24">24 JAM</span>
+              </div>
+              <div class="cctv-meta">
+                <p class="cctv-meta-label"><MapPinIcon class="w-3.5 h-3.5 text-orange-500" /> {{ c.label }}</p>
+                <p class="cctv-meta-sub">{{ c.lokasi }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bento grid (grafik) -->
         <div class="bento-grid">
           <!-- Chart card — 2col -->
           <div class="bento-card bento-chart">
             <div class="bento-card-header">
-              <h3><ArrowTrendingUpIcon class="w-5 h-5 text-blue-600"/> Tren Debit Air 7 Hari</h3>
+              <h3><ArrowTrendingUpIcon class="w-5 h-5 text-orange-500"/> Tren Debit Air 7 Hari</h3>
               <span class="live-tag">Live</span>
             </div>
             <div class="bento-chart-body">
@@ -505,7 +567,7 @@ const showVideo = ref(false)
           <!-- Alert list -->
           <div class="bento-card bento-alerts">
             <div class="bento-card-header">
-              <h3><BellAlertIcon class="w-5 h-5 text-indigo-600"/> Log Kejadian</h3>
+              <h3><BellAlertIcon class="w-5 h-5 text-red-500"/> Log Kejadian</h3>
               <span v-if="unread" class="unread-tag">{{unread}} baru</span>
             </div>
             <div class="bento-alerts-list">
@@ -513,7 +575,7 @@ const showVideo = ref(false)
                 :class="['alert-item', {'alert-unread':!a.read}]">
                 <div v-if="!a.read" class="alert-bar"></div>
                 <component :is="a.status==='Kritis'?FireIcon:a.status==='Siaga'?ExclamationTriangleIcon:InformationCircleIcon"
-                  :class="['w-4 h-4 flex-shrink-0 mt-0.5', a.status==='Kritis'?'text-indigo-700':a.status==='Siaga'?'text-blue-600':'text-blue-400']"/>
+                  :class="['w-4 h-4 flex-shrink-0 mt-0.5', a.status==='Kritis'?'text-red-600':a.status==='Siaga'?'text-orange-500':'text-blue-400']"/>
                 <div class="alert-content">
                   <div class="alert-top">
                     <span :class="['alert-status', a.status==='Kritis'?'status-kritis':a.status==='Siaga'?'status-siaga':'status-info']">{{a.status}}</span>
@@ -528,7 +590,7 @@ const showVideo = ref(false)
 
           <!-- Doughnut -->
           <div class="bento-card bento-donut">
-            <h3 class="bento-donut-title"><GiftIcon class="w-5 h-5 text-blue-600"/> Distribusi Kebutuhan</h3>
+            <h3 class="bento-donut-title"><GiftIcon class="w-5 h-5 text-orange-500"/> Distribusi Kebutuhan</h3>
             <div class="bento-donut-body">
               <Doughnut :data="donutData" :options="donutOpts"/>
             </div>
@@ -557,8 +619,8 @@ const showVideo = ref(false)
               <p>12 titik kritis butuh bantuan segera.</p>
             </div>
             <div class="bento-cta-actions">
-              <router-link to="/donasi" class="bento-cta-btn-primary">💛 Donasi</router-link>
-              <router-link to="/relawan" class="bento-cta-btn-ghost">🙋 Relawan</router-link>
+              <router-link to="/donasi" class="bento-cta-btn-primary"> Donasi</router-link>
+              <router-link to="/relawan" class="bento-cta-btn-ghost"> Relawan</router-link>
             </div>
           </div>
         </div>
@@ -589,6 +651,80 @@ const showVideo = ref(false)
             <div class="gallery-info">
               <span class="gallery-tag">{{ g.tag }}</span>
               <h3 class="gallery-title">{{ g.title }}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ████ 8b. PETA PEMANTAUAN WILAYAH ████ -->
+    <section class="py-20" style="background:#f8fafc">
+      <div class="container">
+        <div class="section-header reveal opacity-0">
+          <div class="section-tag" style="justify-content:center">
+            <MapPinIcon class="w-4 h-4" /> Peta Pemantauan
+          </div>
+          <h2 class="section-title">Pantau Setiap Wilayah Demak</h2>
+          <p class="section-desc">Peta interaktif yang menampilkan status dan ketinggian muka air di tiap kecamatan Kabupaten Demak — diperbarui langsung dari pusat komando, 24 jam sehari.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+          <!-- MAP -->
+          <div class="lg:col-span-2 relative rounded-3xl overflow-hidden border border-gray-200 shadow-lg bg-white">
+            <div class="absolute top-4 left-4 z-[1000] flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur border border-gray-200 shadow-sm">
+              <span class="relative flex h-2.5 w-2.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+              </span>
+              <span class="text-[11px] font-black uppercase tracking-widest text-gray-700">Live · 24/7</span>
+            </div>
+            <div class="absolute top-4 right-4 z-[1000] flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur border border-gray-200 shadow-sm">
+              <ClockIcon class="w-4 h-4 text-orange-500" />
+              <span class="text-[12px] font-bold text-gray-700 tabular-nums">{{ timeStr }} WIB</span>
+            </div>
+            <div class="h-[460px] sm:h-[520px] w-full">
+              <l-map ref="petaMap" v-model:zoom="petaZoom" :center="petaCenter" :options="petaOptions">
+                <l-tile-layer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"></l-tile-layer>
+                <l-circle-marker
+                  v-for="a in wilayahKondisi" :key="a.id"
+                  :lat-lng="[a.lat, a.lng]"
+                  :radius="15"
+                  :color="petaColor(a.status)"
+                  :fill-color="petaColor(a.status)"
+                  :fill-opacity="0.4"
+                  :weight="2.5"
+                >
+                  <l-popup>
+                    <div style="font-family:'Inter',sans-serif;min-width:170px">
+                      <p style="font-weight:900;font-size:14px;color:#0f172a">Kec. {{ a.nama }}</p>
+                      <p style="font-size:12px;color:#475569;margin-top:4px">Tinggi Muka Air: <b>{{ a.tma }}</b></p>
+                      <p style="font-size:12px;color:#475569">Warga terdampak: <b>{{ a.warga.toLocaleString('id') }}</b></p>
+                      <span :style="{ display:'inline-block', marginTop:'8px', fontSize:'11px', fontWeight:700, padding:'2px 8px', borderRadius:'999px', background: petaColor(a.status)+'22', color: petaColor(a.status) }">{{ a.status }}</span>
+                    </div>
+                  </l-popup>
+                </l-circle-marker>
+              </l-map>
+            </div>
+            <div class="absolute bottom-4 left-4 z-[1000] flex gap-4 px-4 py-2.5 rounded-2xl bg-white/90 backdrop-blur border border-gray-200 shadow-sm text-xs font-semibold text-gray-600">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Kritis</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Waspada</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> Aman</span>
+            </div>
+          </div>
+
+          <!-- LIST -->
+          <div class="flex flex-col gap-3">
+            <p class="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-1">Status per Wilayah</p>
+            <div v-for="a in wilayahKondisi" :key="a.id" class="group flex items-center gap-4 p-4 rounded-2xl bg-white border border-gray-100 hover:border-orange-300 hover:shadow-md transition-all">
+              <span class="relative flex h-3 w-3 shrink-0">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" :style="{ background: petaColor(a.status) }"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3" :style="{ background: petaColor(a.status) }"></span>
+              </span>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-gray-900 text-sm">Kec. {{ a.nama }}</p>
+                <p class="text-xs text-gray-500">TMA {{ a.tma }} · {{ a.warga.toLocaleString('id') }} warga</p>
+              </div>
+              <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shrink-0" :style="{ background: petaColor(a.status)+'22', color: petaColor(a.status) }">{{ a.status }}</span>
             </div>
           </div>
         </div>
@@ -647,10 +783,10 @@ const showVideo = ref(false)
         </p>
         <div class="cta-actions">
           <router-link to="/donasi" class="btn-cta-primary">
-            💛 Mulai Donasi Online
+             Mulai Donasi Online
           </router-link>
           <router-link to="/relawan" class="btn-cta-ghost">
-            🙋 Daftar Jadi Relawan
+             Daftar Jadi Relawan
           </router-link>
         </div>
       </div>
@@ -662,10 +798,8 @@ const showVideo = ref(false)
         <div class="footer-grid">
           <div class="footer-brand">
             <div class="footer-logo">
-              <div class="footer-logo-icon">
-                <ShieldCheckIcon class="w-5 h-5 text-white"/>
-              </div>
-              <span>JAGAYA</span>
+              <img :src="logoImg" alt="JAGAYA" style="height:48px; width:auto; object-fit:contain" />
+              <span style="font-size: 24px;">JAGAYA</span>
             </div>
             <p class="footer-desc">Platform manajemen krisis bencana terpadu untuk Kabupaten Demak. Cepat, transparan, dan terkoordinasi.</p>
             <div class="footer-socials">
@@ -685,14 +819,14 @@ const showVideo = ref(false)
             <p class="footer-heading">Kontak</p>
             <ul class="footer-contact">
               <li>Jl. Pemuda No.1, Demak</li>
-              <li>+62 291-685 000</li>
+              <li>+999</li>
               <li>info@jagaya.id</li>
             </ul>
           </div>
         </div>
         <div class="footer-bottom">
           <p>© 2026 JAGAYA System. All Rights Reserved.</p>
-          <p>Didedikasikan untuk Penanggulangan Bencana Demak 🙏</p>
+          <p>Didedikasikan untuk Penanggulangan Bencana Demak </p>
         </div>
       </div>
     </footer>
@@ -720,9 +854,9 @@ const showVideo = ref(false)
 
 /* ── TOKENS ─────────────────────────────────────────────── */
 :root {
-  --red-600: #4338ca;
-  --orange-500: #2563eb;
-  --amber-400: #0ea5e9;
+  --red-600: #dc2626;
+  --orange-500: #f97316;
+  --amber-400: #fbbf24;
 }
 
 .homepage-root {
@@ -741,7 +875,7 @@ const showVideo = ref(false)
 
 /* ── GRADIENT TEXT ─────────────────────────────────── */
 .text-gradient {
-  background: linear-gradient(135deg, #4338ca, #2563eb);
+  background: linear-gradient(135deg, #dc2626, #f97316);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -756,7 +890,7 @@ const showVideo = ref(false)
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: #2563eb;
+  color: #f97316;
   margin-bottom: 12px;
 }
 
@@ -809,8 +943,8 @@ const showVideo = ref(false)
   flex-shrink: 0;
 }
 .btn-outline:hover {
-  border-color: #2563eb;
-  color: #1d4ed8;
+  border-color: #f97316;
+  color: #ea580c;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -836,7 +970,7 @@ const showVideo = ref(false)
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(37, 99, 235, 0.88) 50%, rgba(56, 189, 248, 0.82) 100%);
+  background: linear-gradient(135deg, rgba(153, 27, 27, 0.92) 0%, rgba(180, 52, 23, 0.88) 40%, rgba(194, 65, 12, 0.82) 100%);
 }
 .hero-mesh {
   position: absolute;
@@ -940,14 +1074,14 @@ const showVideo = ref(false)
   padding: 14px 28px;
   border-radius: 999px;
   background: white;
-  color: #1d4ed8;
+  color: #ea580c;
   font-weight: 900;
   font-size: 14px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.2);
   transition: all 0.3s;
 }
 .btn-primary-hero:hover {
-  background: #eff6ff;
+  background: #fff7ed;
   transform: translateY(-2px);
   box-shadow: 0 24px 64px rgba(0,0,0,0.25);
 }
@@ -1026,7 +1160,7 @@ const showVideo = ref(false)
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 .icon-red {
-  background: linear-gradient(135deg, #4338ca, #2563eb);
+  background: linear-gradient(135deg, #dc2626, #f97316);
 }
 .float-card-label {
   font-size: 10px;
@@ -1086,12 +1220,12 @@ const showVideo = ref(false)
 .progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #4338ca, #2563eb);
+  background: linear-gradient(90deg, #dc2626, #f97316);
   transition: width 1s;
 }
 .progress-text {
   font-size: 10px;
-  color: #2563eb;
+  color: #f97316;
   font-weight: 700;
   margin-top: 4px;
 }
@@ -1162,15 +1296,15 @@ const showVideo = ref(false)
   transition: all 0.3s;
 }
 .feature-strip-card:hover {
-  border-color: #bfdbfe;
+  border-color: #fed7aa;
   box-shadow: 0 12px 40px rgba(0,0,0,0.06);
 }
 .feature-strip-icon {
   width: 48px;
   height: 48px;
   border-radius: 16px;
-  background: linear-gradient(135deg, #e0e7ff, #eff6ff);
-  border: 1px solid #bfdbfe;
+  background: linear-gradient(135deg, #fef2f2, #fff7ed);
+  border: 1px solid #fed7aa;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1315,11 +1449,11 @@ const showVideo = ref(false)
 @media (max-width:1023px) {
   .infra-tab-btn { min-width: 200px; flex-shrink: 0; }
 }
-.infra-tab-btn:hover { border-color: #93c5fd; }
+.infra-tab-btn:hover { border-color: #fdba74; }
 .infra-tab-btn.active {
   background: #fff;
-  border-color: #2563eb;
-  box-shadow: 0 4px 20px rgba(37,99,235,0.1);
+  border-color: #f97316;
+  box-shadow: 0 4px 20px rgba(249,115,22,0.1);
 }
 
 .infra-tab-icon {
@@ -1456,17 +1590,17 @@ const showVideo = ref(false)
   gap: 8px;
   padding: 12px 24px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #4338ca, #2563eb);
+  background: linear-gradient(135deg, #dc2626, #f97316);
   color: white;
   font-weight: 800;
   font-size: 14px;
-  box-shadow: 0 8px 24px rgba(37,99,235,0.25);
+  box-shadow: 0 8px 24px rgba(249,115,22,0.25);
   transition: all 0.3s;
   margin-top: auto;
   align-self: flex-start;
 }
 .btn-infra:hover {
-  box-shadow: 0 12px 32px rgba(37,99,235,0.35);
+  box-shadow: 0 12px 32px rgba(249,115,22,0.35);
   transform: translateY(-2px);
 }
 
@@ -1487,23 +1621,22 @@ const showVideo = ref(false)
 @media (min-width:768px) { .stats-grid { grid-template-columns: repeat(4,1fr); gap: 32px; } }
 
 .stat-card {
-  text-align: center;
-  padding: 24px 16px;
-  border-radius: 12px;
-  background: #fafafa;
-  border: 1px solid #f3f4f6;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
 }
 .stat-card:hover {
-  border-color: #bfdbfe;
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 0 15px 30px -5px rgba(249,115,22,0.1);
+}
+.stat-card:hover {
+  border-color: #fed7aa;
   box-shadow: 0 8px 32px rgba(0,0,0,0.04);
 }
 .stat-icon-wrap {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #e0e7ff, #eff6ff);
-  border: 1px solid #bfdbfe;
+  background: linear-gradient(135deg, #fef2f2, #fff7ed);
+  border: 1px solid #fed7aa;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1518,7 +1651,7 @@ const showVideo = ref(false)
 }
 @media (min-width:1024px) { .stat-num { font-size: 3.2rem; } }
 .stat-suffix {
-  background: linear-gradient(135deg, #4338ca, #2563eb);
+  background: linear-gradient(135deg, #dc2626, #f97316);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1561,7 +1694,7 @@ const showVideo = ref(false)
   transition: all 0.3s;
 }
 .process-card:hover {
-  border-color: #93c5fd;
+  border-color: #fdba74;
   box-shadow: 0 12px 40px rgba(0,0,0,0.06);
   transform: translateY(-4px);
 }
@@ -1583,12 +1716,12 @@ const showVideo = ref(false)
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: linear-gradient(135deg, #4338ca, #2563eb);
+  background: linear-gradient(135deg, #dc2626, #f97316);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 16px;
-  box-shadow: 0 8px 24px rgba(37,99,235,0.25);
+  box-shadow: 0 8px 24px rgba(249,115,22,0.25);
   transition: transform 0.3s;
 }
 .process-card:hover .process-icon-wrap {
@@ -1606,7 +1739,7 @@ const showVideo = ref(false)
     right: -10px;
     width: 20px;
     height: 2px;
-    background: linear-gradient(90deg, #60a5fa, #f3f4f6);
+    background: linear-gradient(90deg, #fdba74, #f3f4f6);
     z-index: 10;
   }
 }
@@ -1645,6 +1778,103 @@ const showVideo = ref(false)
   }
 }
 
+/* ── CCTV 24 JAM ──────────────────────────────── */
+.cctv-block {
+  margin-bottom: 32px;
+}
+.cctv-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.cctv-block-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 900;
+  color: #111827;
+}
+.cctv-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width:640px) { .cctv-grid { grid-template-columns: repeat(2,1fr); } }
+@media (min-width:1024px) { .cctv-grid { grid-template-columns: repeat(3,1fr); } }
+
+.cctv-card {
+  background: #fff;
+  border: 1px solid #f3f4f6;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.cctv-card:hover {
+  transform: translateY(-4px);
+  border-color: #fed7aa;
+  box-shadow: 0 20px 40px -10px rgba(249,115,22,0.18);
+}
+.cctv-frame {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: #0b0f1a;
+}
+.cctv-frame iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.cctv-live {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+.cctv-24 {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(249,115,22,0.92);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+.cctv-meta {
+  padding: 12px 16px;
+}
+.cctv-meta-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 900;
+  color: #111827;
+}
+.cctv-meta-sub {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  margin-top: 2px;
+  padding-left: 20px;
+}
+
 .bento-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -1655,11 +1885,12 @@ const showVideo = ref(false)
 }
 
 .bento-card {
-  background: white;
-  border-radius: 16px;
-  border: 1px solid #f3f4f6;
-  box-shadow: 0 10px 40px -10px rgba(37,99,235,0.08);
-  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bento-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -10px rgba(249,115,22,0.15);
+  border-color: #fed7aa;
 }
 
 .bento-chart { grid-column: span 1; }
@@ -1695,7 +1926,7 @@ const showVideo = ref(false)
   font-size: 10px;
   font-weight: 800;
   color: white;
-  background: linear-gradient(135deg, #4338ca, #2563eb);
+  background: linear-gradient(135deg, #dc2626, #f97316);
   padding: 2px 8px;
   border-radius: 999px;
 }
@@ -1720,15 +1951,15 @@ const showVideo = ref(false)
   position: relative;
   border-bottom: 1px solid #fafafa;
 }
-.alert-item:hover { background: rgba(37,99,235,0.04); }
-.alert-unread { background: rgba(37,99,235,0.03); }
+.alert-item:hover { background: rgba(249,115,22,0.04); }
+.alert-unread { background: rgba(249,115,22,0.03); }
 .alert-bar {
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
   width: 3px;
-  background: linear-gradient(180deg, #4338ca, #2563eb);
+  background: linear-gradient(180deg, #dc2626, #f97316);
   border-radius: 0 8px 8px 0;
 }
 .alert-content { flex: 1; min-width: 0; }
@@ -1744,9 +1975,9 @@ const showVideo = ref(false)
   padding: 2px 6px;
   border-radius: 6px;
 }
-.status-kritis { background: #e0e7ff; color: #3730a3; }
-.status-siaga { background: #dbeafe; color: #1e40af; }
-.status-info { background: #eff6ff; color: #2563eb; }
+.status-kritis { background: #fef2f2; color: #b91c1c; }
+.status-siaga { background: #fff7ed; color: #c2410c; }
+.status-info { background: #fff7ed; color: #f97316; }
 .alert-time {
   font-size: 10px;
   color: #9ca3af;
@@ -1804,7 +2035,7 @@ const showVideo = ref(false)
   color: white;
   line-height: 1;
 }
-.bento-dark-num span { color: #2563eb; }
+.bento-dark-num span { color: #f97316; }
 .bento-dark-desc {
   font-size: 12px;
   font-weight: 500;
@@ -1820,7 +2051,7 @@ const showVideo = ref(false)
 }
 .bento-dark-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #0ea5e9);
+  background: linear-gradient(90deg, #ef4444, #f97316);
   border-radius: 999px;
 }
 .bento-dark-bar-text {
@@ -1833,7 +2064,7 @@ const showVideo = ref(false)
 /* CTA card */
 .bento-cta {
   position: relative;
-  background: linear-gradient(135deg, #1e3a8a, #3b82f6, #0ea5e9);
+  background: linear-gradient(135deg, #b91c1c, #dc2626, #ea580c);
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -1884,7 +2115,7 @@ const showVideo = ref(false)
 .bento-cta-btn-primary {
   text-align: center;
   background: white;
-  color: #1d4ed8;
+  color: #ea580c;
   padding: 10px;
   border-radius: 12px;
   font-weight: 900;
@@ -1892,7 +2123,7 @@ const showVideo = ref(false)
   transition: background 0.3s;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
-.bento-cta-btn-primary:hover { background: #eff6ff; }
+.bento-cta-btn-primary:hover { background: #fff7ed; }
 .bento-cta-btn-ghost {
   text-align: center;
   background: rgba(255,255,255,0.2);
@@ -1966,7 +2197,7 @@ const showVideo = ref(false)
 .gallery-tag {
   display: inline-block;
   padding: 4px 12px;
-  background: linear-gradient(135deg, #4338ca, #2563eb);
+  background: linear-gradient(135deg, #dc2626, #f97316);
   border-radius: 999px;
   color: white;
   font-size: 10px;
@@ -1999,18 +2230,18 @@ const showVideo = ref(false)
   padding: 40px;
   border: 1px solid #f3f4f6;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(37,99,235,0.06);
+  box-shadow: 0 10px 30px rgba(249,115,22,0.06);
 }
 .testi-icon {
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: linear-gradient(135deg, #4338ca, #2563eb);
+  background: linear-gradient(135deg, #dc2626, #f97316);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 20px;
-  box-shadow: 0 8px 24px rgba(37,99,235,0.2);
+  box-shadow: 0 8px 24px rgba(249,115,22,0.2);
 }
 .testi-stars {
   display: flex;
@@ -2052,7 +2283,7 @@ const showVideo = ref(false)
 }
 .testi-dot.active {
   width: 32px;
-  background: linear-gradient(90deg, #4338ca, #2563eb);
+  background: linear-gradient(90deg, #dc2626, #f97316);
 }
 .testi-dot:not(.active) {
   width: 8px;
@@ -2067,7 +2298,7 @@ const showVideo = ref(false)
   padding: 96px 16px;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #1e3a8a, #2563eb, #38bdf8);
+  background: linear-gradient(135deg, #991b1b, #dc2626, #ea580c);
 }
 .cta-mesh {
   position: absolute;
@@ -2082,7 +2313,7 @@ const showVideo = ref(false)
   right: -128px;
   width: 500px;
   height: 500px;
-  background: rgba(56, 189, 248, 0.2);
+  background: rgba(251,191,36,0.2);
   border-radius: 999px;
   filter: blur(60px);
 }
@@ -2092,7 +2323,7 @@ const showVideo = ref(false)
   left: -96px;
   width: 320px;
   height: 320px;
-  background: rgba(30, 58, 138, 0.3);
+  background: rgba(127,29,29,0.3);
   border-radius: 999px;
   filter: blur(60px);
 }
@@ -2133,14 +2364,14 @@ const showVideo = ref(false)
   padding: 16px 36px;
   border-radius: 999px;
   background: white;
-  color: #1d4ed8;
+  color: #ea580c;
   font-weight: 900;
   font-size: 15px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.2);
   transition: all 0.3s;
 }
 .btn-cta-primary:hover {
-  background: #eff6ff;
+  background: #fff7ed;
   transform: translateY(-4px);
   box-shadow: 0 24px 64px rgba(0,0,0,0.25);
 }
@@ -2187,7 +2418,7 @@ const showVideo = ref(false)
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #4338ca, #2563eb);
+  background: linear-gradient(135deg, #dc2626, #f97316);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2221,7 +2452,7 @@ const showVideo = ref(false)
   transition: all 0.3s;
 }
 .footer-social:hover {
-  background: linear-gradient(135deg, #4338ca, #2563eb);
+  background: linear-gradient(135deg, #dc2626, #f97316);
 }
 
 .footer-heading {
@@ -2244,7 +2475,7 @@ const showVideo = ref(false)
   font-weight: 500;
   transition: color 0.3s;
 }
-.footer-links a:hover { color: #2563eb; }
+.footer-links a:hover { color: #f97316; }
 
 .footer-contact {
   list-style: none;
@@ -2323,7 +2554,7 @@ const showVideo = ref(false)
 }
 .video-modal-close:hover {
   background: #fef2f2;
-  color: #1d4ed8;
+  color: #ea580c;
 }
 .video-modal-body {
   aspect-ratio: 16/9;

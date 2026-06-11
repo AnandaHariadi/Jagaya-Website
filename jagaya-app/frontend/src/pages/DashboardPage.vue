@@ -1,18 +1,18 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import {
-  HomeIcon, UsersIcon, MapPinIcon, GiftIcon, CurrencyDollarIcon,
-  Cog6ToothIcon, BellIcon, ChevronDownIcon, ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon, MagnifyingGlassIcon, FunnelIcon,
-  EllipsisHorizontalIcon, ArrowRightIcon, ShieldCheckIcon,
-  ClockIcon, ExclamationTriangleIcon, CheckCircleIcon,
-  TruckIcon, HeartIcon, UserGroupIcon, BuildingOfficeIcon,
-  ChartBarIcon, DocumentTextIcon, Bars3Icon, XMarkIcon,
+  GiftIcon, BellIcon, ArrowTrendingUpIcon,
+  MagnifyingGlassIcon, FunnelIcon,
+  EllipsisHorizontalIcon,
+  ExclamationTriangleIcon, CheckCircleIcon,
+  UserGroupIcon, BuildingOfficeIcon,
   ArrowUpIcon, ArrowDownIcon, EyeIcon,
-  ArrowLeftOnRectangleIcon,
+  ArrowLeftOnRectangleIcon, MapPinIcon, UsersIcon,
+  TruckIcon, CurrencyDollarIcon, ArrowDownTrayIcon,
 } from '@heroicons/vue/24/outline'
+import DashboardSidebar from '../components/DashboardSidebar.vue'
+import { sidebarOpen, handleLogout, downloadCSV } from '../composables/dashboardState'
 
-import { ShieldCheckIcon as ShieldSolid } from '@heroicons/vue/24/solid'
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
   LineElement, BarElement, Title, Tooltip, Legend, ArcElement, Filler
@@ -20,23 +20,6 @@ import {
 import { Line, Doughnut } from 'vue-chartjs'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler)
-
-/* ── SIDEBAR ─────────────────────────────────────────── */
-const sidebarOpen = ref(true)
-const activeMenu = ref('Dashboard')
-
-const menuItems = [
-  { name: 'Dashboard', icon: HomeIcon, path: '/dashboard' },
-  { name: 'Pengungsian', icon: MapPinIcon, path: '/pengungsian' },
-  { name: 'Relawan', icon: UsersIcon, path: '/relawan', badge: 12 },
-  { name: 'Donasi', icon: HeartIcon, path: '/donasi' },
-  { name: 'Logistik', icon: TruckIcon, path: '/logistik' },
-  { name: 'Laporan', icon: DocumentTextIcon, path: '/laporan' },
-]
-
-const bottomMenuItems = [
-  { name: 'Pengaturan', icon: Cog6ToothIcon, path: '/dashboard' },
-]
 
 /* ── LIVE CLOCK ─────────────────────────────────────────── */
 const now = ref(new Date())
@@ -51,6 +34,7 @@ const statCards = [
   {
     category: 'Pengungsian',
     icon: MapPinIcon,
+    path: '/pengungsian',
     color: 'from-red-600 to-red-500',
     bgLight: 'bg-red-50',
     textColor: 'text-red-600',
@@ -63,6 +47,7 @@ const statCards = [
   {
     category: 'Relawan',
     icon: UsersIcon,
+    path: '/relawan',
     color: 'from-orange-500 to-amber-500',
     bgLight: 'bg-orange-50',
     textColor: 'text-orange-600',
@@ -75,6 +60,7 @@ const statCards = [
   {
     category: 'Logistik',
     icon: TruckIcon,
+    path: '/logistik',
     color: 'from-emerald-600 to-emerald-500',
     bgLight: 'bg-emerald-50',
     textColor: 'text-emerald-600',
@@ -87,6 +73,7 @@ const statCards = [
   {
     category: 'Donasi',
     icon: CurrencyDollarIcon,
+    path: '/donasi',
     color: 'from-violet-600 to-violet-500',
     bgLight: 'bg-violet-50',
     textColor: 'text-violet-600',
@@ -186,13 +173,48 @@ const poskoData = ref([
 ])
 
 const searchQuery = ref('')
+const statusFilter = ref('Semua')
+const showFilterMenu = ref(false)
+const statusOptions = ['Semua', 'Kritis', 'Siaga', 'Normal']
+
 const filteredPosko = computed(() => {
-  if (!searchQuery.value) return poskoData.value
-  const q = searchQuery.value.toLowerCase()
-  return poskoData.value.filter(p =>
-    p.nama.toLowerCase().includes(q) || p.lokasi.toLowerCase().includes(q) || p.koordinator.toLowerCase().includes(q)
-  )
+  let list = poskoData.value
+  if (statusFilter.value !== 'Semua') list = list.filter(p => p.status === statusFilter.value)
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    list = list.filter(p =>
+      p.nama.toLowerCase().includes(q) || p.lokasi.toLowerCase().includes(q) || p.koordinator.toLowerCase().includes(q)
+    )
+  }
+  return list
 })
+
+/* ── PAGINATION ─────────────────────────────────────────── */
+const currentPage = ref(1)
+const pageSize = 4
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredPosko.value.length / pageSize)))
+const pagedPosko = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return filteredPosko.value.slice(start, start + pageSize)
+})
+const setStatusFilter = (s) => { statusFilter.value = s; showFilterMenu.value = false; currentPage.value = 1 }
+const prevPage = () => { if (currentPage.value > 1) currentPage.value-- }
+const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++ }
+watch(() => filteredPosko.value.length, () => { if (currentPage.value > totalPages.value) currentPage.value = 1 })
+
+/* ── CSV EXPORTS ────────────────────────────────────────── */
+const exportPoskoCSV = () => {
+  const rows = [['Nama Posko', 'Lokasi', 'Koordinator', 'Kapasitas', 'Pengungsi', 'Status', 'Update']]
+  filteredPosko.value.forEach(p => rows.push([p.nama, p.lokasi, p.koordinator, p.kapasitas, p.pengungsi, p.status, p.lastUpdate]))
+  downloadCSV('data-posko-pengungsian.csv', rows)
+}
+const showDonutMenu = ref(false)
+const exportDonutCSV = () => {
+  const rows = [['Kebutuhan', 'Persentase']]
+  donutData.labels.forEach((l, i) => rows.push([l, donutData.datasets[0].data[i] + '%']))
+  downloadCSV('distribusi-kebutuhan.csv', rows)
+  showDonutMenu.value = false
+}
 
 /* ── RECENT ACTIVITIES ───────────────────────────────────── */
 const activities = [
@@ -203,80 +225,19 @@ const activities = [
   { time: '08:00', text: 'Relawan baru terdaftar: 15 orang', type: 'info' },
 ]
 
-/* ── NOTIFICATION COUNT ─────────────────────────────────── */
-const notifCount = ref(5)
-
-const handleLogout = () => {
-  localStorage.removeItem('isAuthenticated')
-  window.location.href = '/login'
-}
+/* ── NOTIFICATIONS ──────────────────────────────────────── */
+const showNotif = ref(false)
+const notifCount = computed(() => activities.length)
 </script>
 
 
 <template>
   <div class="dashboard-wrapper" style="font-family:'Inter',system-ui,sans-serif">
     <!-- ═══════ SIDEBAR ═══════ -->
-    <aside class="sidebar" :class="{ collapsed: !sidebarOpen }">
-      <!-- Logo -->
-      <div class="sidebar-header">
-        <div class="sidebar-logo">
-          <div class="logo-icon">
-            <ShieldSolid class="w-5 h-5 text-white" />
-          </div>
-          <transition name="fade-text">
-            <span v-if="sidebarOpen" class="logo-text">JAGAYA</span>
-          </transition>
-        </div>
-        <button @click="sidebarOpen = !sidebarOpen" class="sidebar-toggle">
-          <Bars3Icon v-if="!sidebarOpen" class="w-5 h-5" />
-          <XMarkIcon v-else class="w-5 h-5" />
-        </button>
-      </div>
-
-      <!-- User card -->
-      <div class="sidebar-user" v-if="sidebarOpen">
-        <div class="user-avatar">
-          <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&q=80" alt="Admin" />
-          <span class="user-status-dot"></span>
-        </div>
-        <div class="user-info">
-          <p class="user-name">Admin Posko</p>
-          <p class="user-role">Koordinator Utama</p>
-        </div>
-        <ChevronDownIcon class="w-4 h-4 text-gray-400" />
-      </div>
-
-      <!-- Navigation -->
-      <nav class="sidebar-nav">
-        <p class="nav-label" v-if="sidebarOpen">MENU UTAMA</p>
-        <router-link
-          v-for="item in menuItems" :key="item.name"
-          :to="item.path"
-          class="nav-item"
-          :class="{ active: activeMenu === item.name }"
-          @click="activeMenu = item.name"
-        >
-          <component :is="item.icon" class="nav-icon" />
-          <span v-if="sidebarOpen" class="nav-text">{{ item.name }}</span>
-          <span v-if="item.badge && sidebarOpen" class="nav-badge">{{ item.badge }}</span>
-        </router-link>
-      </nav>
-
-      <!-- Bottom nav -->
-      <div class="sidebar-bottom">
-        <router-link
-          v-for="item in bottomMenuItems" :key="item.name"
-          :to="item.path"
-          class="nav-item"
-        >
-          <component :is="item.icon" class="nav-icon" />
-          <span v-if="sidebarOpen" class="nav-text">{{ item.name }}</span>
-        </router-link>
-      </div>
-    </aside>
+    <DashboardSidebar />
 
     <!-- ═══════ MAIN CONTENT ═══════ -->
-    <div class="main-content">
+    <div class="main-content" :class="{ collapsed: !sidebarOpen }">
       <!-- Top Header Bar -->
       <header class="top-header">
         <div class="header-left">
@@ -287,13 +248,32 @@ const handleLogout = () => {
           <!-- Search -->
           <div class="header-search">
             <MagnifyingGlassIcon class="search-icon" />
-            <input type="text" placeholder="Cari data posko, relawan..." class="search-input" />
+            <input v-model="searchQuery" type="text" placeholder="Cari data posko, koordinator..." class="search-input" />
           </div>
           <!-- Notification -->
-          <button class="notif-btn">
-            <BellIcon class="w-5 h-5" />
-            <span v-if="notifCount" class="notif-badge">{{ notifCount }}</span>
-          </button>
+          <div class="notif-wrap">
+            <button class="notif-btn" @click="showNotif = !showNotif" type="button">
+              <BellIcon class="w-5 h-5" />
+              <span v-if="notifCount" class="notif-badge">{{ notifCount }}</span>
+            </button>
+            <transition name="dd">
+              <div v-if="showNotif" class="notif-dropdown">
+                <div class="notif-dd-header">
+                  <span>Notifikasi</span>
+                  <span class="notif-dd-count">{{ notifCount }} baru</span>
+                </div>
+                <div class="notif-dd-list">
+                  <div v-for="(a, i) in activities" :key="i" class="notif-dd-item">
+                    <span :class="['notif-dd-dot', `dot-${a.type}`]"></span>
+                    <div>
+                      <p class="notif-dd-text">{{ a.text }}</p>
+                      <p class="notif-dd-time">{{ a.time }} WIB</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </transition>
+          </div>
           <!-- Logout -->
           <button class="view-site-btn" @click="handleLogout" type="button" style="background:#fff; color:#dc2626; border:1px solid #fee2e2;">
             <ArrowLeftOnRectangleIcon class="w-4 h-4" />
@@ -306,6 +286,10 @@ const handleLogout = () => {
           </router-link>
         </div>
       </header>
+
+      <!-- click-away backdrop for dropdowns -->
+      <div v-if="showNotif || showFilterMenu || showDonutMenu" class="dd-backdrop"
+           @click="showNotif = false; showFilterMenu = false; showDonutMenu = false"></div>
 
 
       <!-- Content Area -->
@@ -328,7 +312,7 @@ const handleLogout = () => {
 
         <!-- ══ Stat Cards (4 columns like the image) ══ -->
         <div class="stat-cards-grid">
-          <div v-for="card in statCards" :key="card.category" class="stat-card">
+          <router-link v-for="card in statCards" :key="card.category" :to="card.path" class="stat-card stat-card-link">
             <div class="stat-card-header">
               <div :class="['stat-card-icon', card.bgLight]">
                 <component :is="card.icon" :class="['w-5 h-5', card.textColor]" />
@@ -341,7 +325,7 @@ const handleLogout = () => {
                 <p class="stat-label">{{ stat.label }}</p>
               </div>
             </div>
-          </div>
+          </router-link>
         </div>
 
         <!-- ══ Main Grid: Chart + Side Metrics ══ -->
@@ -400,9 +384,18 @@ const handleLogout = () => {
           <div class="donut-card">
             <div class="donut-header">
               <h3 class="chart-title">Distribusi Kebutuhan</h3>
-              <button class="header-action-btn">
-                <EllipsisHorizontalIcon class="w-5 h-5" />
-              </button>
+              <div class="donut-menu-wrap">
+                <button class="header-action-btn" @click="showDonutMenu = !showDonutMenu" type="button">
+                  <EllipsisHorizontalIcon class="w-5 h-5" />
+                </button>
+                <transition name="dd">
+                  <div v-if="showDonutMenu" class="donut-menu">
+                    <button @click="exportDonutCSV" type="button">
+                      <ArrowDownTrayIcon class="w-4 h-4" /> Unduh CSV
+                    </button>
+                  </div>
+                </transition>
+              </div>
             </div>
             <div class="donut-body">
               <div class="donut-wrap">
@@ -458,9 +451,21 @@ const handleLogout = () => {
                 <MagnifyingGlassIcon class="w-4 h-4 text-gray-400" />
                 <input v-model="searchQuery" type="text" placeholder="Cari posko..." class="table-search-input" />
               </div>
-              <button class="filter-btn">
-                <FunnelIcon class="w-4 h-4" />
-                Filter
+              <div class="filter-wrap">
+                <button class="filter-btn" :class="{ 'filter-active': statusFilter !== 'Semua' }" @click="showFilterMenu = !showFilterMenu" type="button">
+                  <FunnelIcon class="w-4 h-4" />
+                  {{ statusFilter === 'Semua' ? 'Filter' : statusFilter }}
+                </button>
+                <transition name="dd">
+                  <div v-if="showFilterMenu" class="filter-menu">
+                    <button v-for="s in statusOptions" :key="s" type="button"
+                      :class="{ active: statusFilter === s }" @click="setStatusFilter(s)">{{ s }}</button>
+                  </div>
+                </transition>
+              </div>
+              <button class="filter-btn" @click="exportPoskoCSV" type="button">
+                <ArrowDownTrayIcon class="w-4 h-4" />
+                Ekspor
               </button>
             </div>
           </div>
@@ -479,7 +484,7 @@ const handleLogout = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="p in filteredPosko" :key="p.id" class="table-row">
+                <tr v-for="p in pagedPosko" :key="p.id" class="table-row">
                   <td>
                     <div class="posko-name-cell">
                       <div class="posko-avatar">
@@ -527,11 +532,16 @@ const handleLogout = () => {
 
           <!-- Pagination -->
           <div class="table-footer">
-            <p class="table-info">Menampilkan <strong>1</strong> sampai <strong>{{ filteredPosko.length }}</strong> dari <strong>{{ poskoData.length }}</strong> posko</p>
+            <p class="table-info">
+              Menampilkan <strong>{{ filteredPosko.length === 0 ? 0 : (currentPage - 1) * pageSize + 1 }}</strong>
+              sampai <strong>{{ Math.min(currentPage * pageSize, filteredPosko.length) }}</strong>
+              dari <strong>{{ filteredPosko.length }}</strong> posko
+            </p>
             <div class="table-pagination">
-              <button class="page-btn" disabled>&laquo;</button>
-              <button class="page-btn active">1</button>
-              <button class="page-btn">&raquo;</button>
+              <button class="page-btn" :disabled="currentPage === 1" @click="prevPage">&laquo;</button>
+              <button v-for="n in totalPages" :key="n" class="page-btn"
+                :class="{ active: currentPage === n }" @click="currentPage = n">{{ n }}</button>
+              <button class="page-btn" :disabled="currentPage === totalPages" @click="nextPage">&raquo;</button>
             </div>
           </div>
         </div>
@@ -704,9 +714,69 @@ const handleLogout = () => {
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
 }
-.sidebar.collapsed ~ .main-content {
+.main-content.collapsed {
   margin-left: 72px;
 }
+@media (max-width: 768px) {
+  .main-content, .main-content.collapsed { margin-left: 72px; }
+}
+
+/* ═══════ DROPDOWNS / INTERACTIVE ═══════ */
+.dd-backdrop { position: fixed; inset: 0; z-index: 40; }
+.dd-enter-active, .dd-leave-active { transition: all 0.18s ease; }
+.dd-enter-from, .dd-leave-to { opacity: 0; transform: translateY(-6px); }
+
+.stat-card-link { text-decoration: none; display: block; cursor: pointer; }
+
+.notif-wrap { position: relative; }
+.notif-dropdown {
+  position: absolute; top: calc(100% + 10px); right: 0; z-index: 60;
+  width: 320px; background: #fff; border: 1px solid #f0f0f3;
+  border-radius: 14px; box-shadow: 0 16px 48px rgba(0,0,0,0.12); overflow: hidden;
+}
+.notif-dd-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; border-bottom: 1px solid #f5f5f7;
+  font-size: 13px; font-weight: 800; color: #111827;
+}
+.notif-dd-count { font-size: 10px; font-weight: 800; color: #ea580c; background: #fff7ed; padding: 2px 8px; border-radius: 999px; }
+.notif-dd-list { max-height: 320px; overflow-y: auto; }
+.notif-dd-item { display: flex; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #fafafa; }
+.notif-dd-item:hover { background: #fafafa; }
+.notif-dd-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.notif-dd-dot.dot-danger { background: #ef4444; }
+.notif-dd-dot.dot-success { background: #22c55e; }
+.notif-dd-dot.dot-warning { background: #f59e0b; }
+.notif-dd-dot.dot-info { background: #3b82f6; }
+.notif-dd-text { font-size: 12.5px; font-weight: 600; color: #374151; line-height: 1.4; }
+.notif-dd-time { font-size: 10px; font-weight: 600; color: #9ca3af; margin-top: 2px; }
+
+.donut-menu-wrap { position: relative; }
+.donut-menu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 60;
+  background: #fff; border: 1px solid #f0f0f3; border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12); overflow: hidden; min-width: 150px;
+}
+.donut-menu button {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 10px 14px; border: none; background: #fff; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: #374151; text-align: left;
+}
+.donut-menu button:hover { background: #fff7ed; color: #ea580c; }
+
+.filter-wrap { position: relative; }
+.filter-active { border-color: #ea580c !important; color: #ea580c !important; background: #fff7ed !important; }
+.filter-menu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 60;
+  background: #fff; border: 1px solid #f0f0f3; border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12); overflow: hidden; min-width: 150px;
+}
+.filter-menu button {
+  display: block; width: 100%; padding: 9px 14px; border: none; background: #fff;
+  cursor: pointer; font-size: 13px; font-weight: 600; color: #374151; text-align: left;
+}
+.filter-menu button:hover { background: #f5f5f7; }
+.filter-menu button.active { background: #fff7ed; color: #ea580c; font-weight: 800; }
 
 /* Top Header */
 .top-header {

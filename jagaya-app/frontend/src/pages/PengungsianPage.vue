@@ -6,6 +6,8 @@ import { Line } from 'vue-chartjs'
 import 'leaflet/dist/leaflet.css'
 import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet'
 import L from 'leaflet'
+import DashboardLayout from '../components/DashboardLayout.vue'
+import { downloadCSV } from '../composables/dashboardState'
 
 // Fix for default Leaflet icon in Vue
 delete L.Icon.Default.prototype._getIconUrl
@@ -56,19 +58,26 @@ const poskoImages = [
   'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=600&q=80',
   'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=600&q=80'
 ]
+
+const exportLaporan = () => {
+  const rows = [['Nama Posko', 'Latitude', 'Longitude', 'Kapasitas', 'Terisi', 'Status', 'Tren']]
+  poskoData.value.forEach(p => rows.push([p.nama, p.lat, p.lng, p.kapasitas, p.terisi, p.status, p.tren]))
+  downloadCSV('laporan-pengungsian-demak.csv', rows)
+}
 </script>
 
 <template>
-  <div class="bg-gray-50 min-h-screen font-sans pb-24">
+  <DashboardLayout>
+    <div class="font-sans pb-24">
     <!-- Header -->
-    <div class="bg-white pt-10 pb-16 border-b border-gray-200">
+    <div class="bg-white pt-8 pb-10 border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-end justify-between">
+        <div class="flex items-end justify-between flex-wrap gap-4">
           <div>
             <span class="text-red-600 text-[11px] font-bold uppercase tracking-widest mb-2 block">Analisis Tata Letak & Kapasitas</span>
             <h1 class="text-3xl font-black text-gray-900 tracking-tight">Geospasial Posko Pengungsian</h1>
           </div>
-          <button class="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-orange-600 transition-colors shadow-lg">Unduh Laporan Analitik</button>
+          <button class="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-orange-600 transition-colors shadow-lg" @click="exportLaporan" type="button">Unduh Laporan Analitik</button>
         </div>
       </div>
     </div>
@@ -175,7 +184,8 @@ const poskoImages = [
 
       </div>
     </div>
-  </div>
+    </div>
+  </DashboardLayout>
 </template>
 
 <style scoped>

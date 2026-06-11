@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
+import logoImg from '../assets/logo-jagaya.png'
 
 const isOpen = ref(false)
 const router = useRouter()
@@ -10,8 +11,8 @@ const route = useRoute()
 const navLinks = [
   { name: 'Beranda', path: '/landing' },
   { name: 'Dashboard', path: '/dashboard' },
+  { name: 'Forum Aspirasi', path: '/forum' },
   { name: 'Donasi', path: '/donasi' },
-  { name: 'Relawan', path: '/relawan' },
   { name: 'Tentang Kami', path: '/developer' }
 ]
 
@@ -33,14 +34,8 @@ const toggleMenu = () => {
       <div class="flex justify-between items-center h-20">
         <!-- Logo -->
         <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer group" @click="router.push('/landing')">
-          <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-[0_5px_15px_rgba(37,99,235,0.2)] group-hover:shadow-[0_8px_20px_rgba(37,99,235,0.3)] transition-all">
-            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor"/>
-              <path d="M2 17l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <span class="text-xl font-black tracking-tight text-gray-900 group-hover:text-blue-600 transition-colors">JAGAYA</span>
+          <img :src="logoImg" alt="JAGAYA" class="h-14 w-auto object-contain" />
+          <span class="text-xl font-black tracking-tight text-gray-900 group-hover:text-orange-600 transition-colors">JAGAYA</span>
         </div>
 
         <!-- Desktop Navigation -->
@@ -50,11 +45,11 @@ const toggleMenu = () => {
             :key="link.path" 
             :to="link.path"
             class="px-5 py-2.5 rounded-full text-[14px] font-semibold transition-all duration-300 relative group overflow-hidden"
-            :class="[isActive(link.path) ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900']"
+            :class="[isActive(link.path) ? 'text-orange-600' : 'text-gray-500 hover:text-gray-900']"
           >
             <span class="relative z-10">{{ link.name }}</span>
             <div 
-              class="absolute inset-0 bg-blue-50 rounded-full transition-transform duration-300 transform scale-0 origin-center z-0"
+              class="absolute inset-0 bg-orange-50 rounded-full transition-transform duration-300 transform scale-0 origin-center z-0"
               :class="isActive(link.path) ? 'scale-100' : 'group-hover:scale-100'"
             ></div>
           </router-link>
@@ -62,8 +57,8 @@ const toggleMenu = () => {
 
         <!-- Right CTA & Profile -->
         <div class="hidden md:flex items-center gap-4">
-          <router-link to="/login" class="px-6 py-2.5 text-[14px] font-bold text-gray-700 hover:text-blue-600 transition-colors">Masuk</router-link>
-          <router-link to="/donasi" class="px-6 py-2.5 rounded-full bg-gray-900 hover:bg-blue-600 text-white text-[14px] font-bold shadow-md hover:shadow-xl hover:shadow-blue-500/20 transition-all transform hover:-translate-y-0.5">
+          <router-link to="/login" class="px-6 py-2.5 text-[14px] font-bold text-gray-700 hover:text-orange-600 transition-colors">Masuk</router-link>
+          <router-link to="/donasi" class="px-6 py-2.5 rounded-full bg-gray-900 hover:bg-orange-600 text-white text-[14px] font-bold shadow-md hover:shadow-xl hover:shadow-orange-500/20 transition-all transform hover:-translate-y-0.5">
             Bantu Sekarang
           </router-link>
         </div>
@@ -87,7 +82,7 @@ const toggleMenu = () => {
           :to="link.path"
           @click="isOpen = false"
           class="block px-4 py-3 rounded-xl text-base font-semibold transition-colors"
-          :class="[isActive(link.path) ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900']"
+          :class="[isActive(link.path) ? 'bg-orange-50 text-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900']"
         >
           {{ link.name }}
         </router-link>
@@ -95,7 +90,7 @@ const toggleMenu = () => {
           <router-link to="/login" @click="isOpen = false" class="w-full text-center px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors">
             Masuk ke Sistem
           </router-link>
-          <router-link to="/donasi" @click="isOpen = false" class="w-full text-center px-4 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors">
+          <router-link to="/donasi" @click="isOpen = false" class="w-full text-center px-4 py-3 rounded-xl bg-orange-600 text-white font-bold hover:bg-orange-700 transition-colors">
             Bantu Sekarang
           </router-link>
         </div>

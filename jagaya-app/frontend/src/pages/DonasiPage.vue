@@ -1,9 +1,7 @@
 <script setup>
-import { ref } from 'vue'
-import { CurrencyDollarIcon, ArrowTrendingUpIcon, ShieldCheckIcon, DocumentCheckIcon, ArrowLeftOnRectangleIcon } from '@heroicons/vue/24/outline'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
+import { CurrencyDollarIcon, ArrowTrendingUpIcon, ShieldCheckIcon, DocumentCheckIcon } from '@heroicons/vue/24/outline'
+import DashboardLayout from '../components/DashboardLayout.vue'
+import { downloadCSV } from '../composables/dashboardState'
 
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js'
 import { Line } from 'vue-chartjs'
@@ -41,32 +39,28 @@ const recentDonations = [
   { id: 'TRX-9980', nama: 'Komunitas Peduli Demak', nominal: 'Rp 12.500.000', waktu: '3 jam lalu', verifikasi: true },
 ]
 
-const handleLogout = () => {
-  localStorage.removeItem('isAuthenticated')
-  router.push('/login')
+const exportLedger = () => {
+  const rows = [['ID Transaksi', 'Donatur', 'Nominal', 'Waktu', 'Terverifikasi']]
+  recentDonations.forEach(d => rows.push([d.id, d.nama, d.nominal, d.waktu, d.verifikasi ? 'Ya' : 'Tidak']))
+  downloadCSV('audit-donasi-jagaya.csv', rows)
 }
 </script>
 
 
 <template>
-  <div class="bg-gray-50 min-h-screen font-sans pb-24" >
-    <div class="bg-white pt-24 pb-16 border-b border-gray-200">
+  <DashboardLayout>
+    <div class="font-sans pb-24">
+    <div class="bg-white pt-8 pb-10 border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-end justify-between">
+        <div class="flex items-end justify-between flex-wrap gap-4">
           <div>
             <span class="text-green-600 text-[11px] font-bold uppercase tracking-widest mb-2 block">Analisis Finansial Terbuka</span>
             <h1 class="text-3xl font-black text-gray-900 tracking-tight">Transparansi Dana Bantuan</h1>
           </div>
-          <div class="flex items-center gap-3">
-            <button class="bg-white border border-emerald-100 text-red-600 px-4 py-2.5 rounded-xl font-bold hover:bg-emerald-50 transition-colors flex items-center gap-2" @click="handleLogout" type="button">
-              <ArrowLeftOnRectangleIcon class="w-5 h-5" /> Logout
-            </button>
-            <button class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold hover:from-green-700 hover:to-emerald-700 transition-colors shadow-lg flex items-center gap-2">
-              <DocumentCheckIcon class="w-5 h-5" /> Download Audit Report
-            </button>
-          </div>
+          <button class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold hover:from-green-700 hover:to-emerald-700 transition-colors shadow-lg flex items-center gap-2" @click="exportLedger" type="button">
+            <DocumentCheckIcon class="w-5 h-5" /> Download Audit Report
+          </button>
         </div>
-
       </div>
     </div>
 
@@ -156,7 +150,8 @@ const handleLogout = () => {
       </div>
 
     </div>
-  </div>
+    </div>
+  </DashboardLayout>
 </template>
 
 <style scoped>

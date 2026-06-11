@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import logoImg from '../assets/logo-jagaya.png'
 
 const router = useRouter()
 const progress = ref(0)
@@ -38,17 +39,7 @@ onMounted(() => {
       <div class="relative mb-6">
         <div class="absolute inset-0 bg-gradient-to-tr from-orange-500 to-red-600 rounded-2xl blur-lg opacity-30 animate-pulse"></div>
         <div class="w-20 h-20 bg-white rounded-2xl shadow-[0_10px_30px_rgba(249,115,22,0.15)] flex items-center justify-center relative z-10 border border-gray-50">
-          <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M12 2L2 7l10 5 10-5-10-5z" fill="url(#splashGrad)"/>
-            <path d="M2 17l10 5 10-5" stroke="url(#splashGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M2 12l10 5 10-5" stroke="url(#splashGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <defs>
-              <linearGradient id="splashGrad" x1="2" y1="2" x2="22" y2="22">
-                <stop offset="0%" stop-color="#f97316"/>
-                <stop offset="100%" stop-color="#dc2626"/>
-              </linearGradient>
-            </defs>
-          </svg>
+          <img :src="logoImg" alt="JAGAYA" class="w-14 h-14 object-contain" />
         </div>
       </div>
 
