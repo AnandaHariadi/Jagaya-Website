@@ -55,8 +55,8 @@ const handleLogin = () => {
 
       <!-- Content -->
       <div class="relative z-20 text-center text-white max-w-lg">
-        <div class="inline-flex bg-white rounded-3xl p-4 mx-auto mb-8 items-center justify-center shadow-2xl transform -rotate-6">
-          <img :src="logoImg" alt="JAGAYA" class="w-28 h-28 object-contain" />
+        <div class="inline-flex w-[144px] h-[144px] bg-white rounded-3xl p-1 mx-auto mb-8 items-center justify-center shadow-2xl transform -rotate-6">
+          <img :src="logoImg" alt="JAGAYA" class="w-full h-full object-contain transform scale-110" />
         </div>
         <h1 class="text-5xl font-black mb-6 tracking-tight">JAGAYA System</h1>
         <p class="text-lg font-medium text-white/90 leading-relaxed mb-8">
