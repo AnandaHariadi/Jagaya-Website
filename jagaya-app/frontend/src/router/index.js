@@ -66,6 +66,29 @@ const routes = [
     path: '/developer',
     name: 'Developer',
     component: () => import('../pages/DeveloperPage.vue')
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: () => import('../pages/RegisterPage.vue')
+  },
+  {
+    path: '/public-dashboard',
+    name: 'PublicDashboard',
+    component: () => import('../pages/PublicDashboard.vue'),
+    meta: { requiresAuth: true, publicOnly: true }
+  },
+  {
+    path: '/public-donasi',
+    name: 'PublicDonasi',
+    component: () => import('../pages/PublicDonasiPage.vue'),
+    meta: { requiresAuth: true, publicOnly: true }
+  },
+  {
+    path: '/public-relawan',
+    name: 'PublicRelawan',
+    component: () => import('../pages/PublicRelawanPage.vue'),
+    meta: { requiresAuth: true, publicOnly: true }
   }
 ]
 
@@ -76,12 +99,16 @@ const router = createRouter({
 
 // Navigation Guard
 function isAuthenticated() {
-  // Mock auth for now (rely on localStorage). Ke depan bisa diganti JWT/token.
   return localStorage.getItem('isAuthenticated') === 'true'
+}
+
+function getUserRole() {
+  return localStorage.getItem('userRole') || 'petugas'
 }
 
 router.beforeEach((to, from, next) => {
   const authed = isAuthenticated()
+  const role = getUserRole()
 
   // protect any route with meta.requiresAuth
   if (to.meta.requiresAuth && !authed) {
@@ -92,9 +119,25 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  // if already logged in, don't show login page
-  if (to.path === '/login' && authed) {
-    next('/dashboard')
+  // Check role restrictions
+  if (to.meta.requiresAuth && authed) {
+    if (to.meta.publicOnly && role === 'petugas') {
+      next('/dashboard')
+      return
+    }
+    if (!to.meta.publicOnly && role === 'masyarakat') {
+      next('/public-dashboard')
+      return
+    }
+  }
+
+  // if already logged in, don't show login or register page
+  if ((to.path === '/login' || to.path === '/register') && authed) {
+    if (role === 'masyarakat') {
+      next('/public-dashboard')
+    } else {
+      next('/dashboard')
+    }
     return
   }
 

@@ -52,12 +52,12 @@ const chartOpts = {
 }
 
 // Images of Posko
-const poskoImages = [
-  'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1605814516104-e3eb6ce36916?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=600&q=80'
-]
+import img1 from '../assets/tenda_pengungsian.png'
+import img2 from '../assets/fasilitas_medis.png'
+import img3 from '../assets/dapur_umum.png'
+import img4 from '../assets/suasana_dalam_tenda.png'
+
+const poskoImages = [img1, img2, img3, img4]
 
 const exportLaporan = () => {
   const rows = [['Nama Posko', 'Latitude', 'Longitude', 'Kapasitas', 'Terisi', 'Status', 'Tren']]

@@ -10,15 +10,21 @@ const route = useRoute()
 const email = ref('')
 const password = ref('')
 const isLoading = ref(false)
+const role = ref('petugas') // Default role
 
 const handleLogin = () => {
   isLoading.value = true
   // Mock login delay
   setTimeout(() => {
     localStorage.setItem('isAuthenticated', 'true')
+    localStorage.setItem('userRole', role.value)
 
-    const redirect = route.query.redirect
-    router.push(redirect ? String(redirect) : '/dashboard')
+    if (role.value === 'masyarakat') {
+      router.push('/public-dashboard')
+    } else {
+      const redirect = route.query.redirect
+      router.push(redirect ? String(redirect) : '/dashboard')
+    }
 
     isLoading.value = false
   }, 1000)
@@ -95,12 +101,18 @@ const handleLogin = () => {
         </div>
 
         <form class="space-y-6 relative z-10" @submit.prevent="handleLogin">
+          <!-- Role Selection Tabs -->
+          <div class="flex p-1 bg-gray-100 rounded-xl mb-6">
+            <button type="button" @click="role = 'petugas'" :class="role === 'petugas' ? 'bg-white shadow text-orange-600' : 'text-gray-500 hover:text-gray-700'" class="flex-1 py-2 text-sm font-bold rounded-lg transition-all">Petugas</button>
+            <button type="button" @click="role = 'masyarakat'" :class="role === 'masyarakat' ? 'bg-white shadow text-orange-600' : 'text-gray-500 hover:text-gray-700'" class="flex-1 py-2 text-sm font-bold rounded-lg transition-all">Masyarakat</button>
+          </div>
+
           <div>
-            <label for="email" class="block text-[13px] font-bold text-gray-700 uppercase tracking-wide mb-2">Email / ID Petugas</label>
+            <label for="email" class="block text-[13px] font-bold text-gray-700 uppercase tracking-wide mb-2">{{ role === 'petugas' ? 'Email / ID Petugas' : 'Email Anda' }}</label>
             <div class="mt-1">
               <input id="email" name="email" type="email" autocomplete="email" required v-model="email" 
                      class="appearance-none block w-full px-5 py-3.5 border border-gray-200 rounded-2xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 font-medium text-[15px] transition-all bg-gray-50 focus:bg-white" 
-                     placeholder="contoh@relawan.demak.go.id" />
+                     :placeholder="role === 'petugas' ? 'contoh@relawan.demak.go.id' : 'email@contoh.com'" />
             </div>
           </div>
 
@@ -135,10 +147,14 @@ const handleLogin = () => {
           </div>
         </form>
 
-        <div class="mt-8 text-center border-t border-gray-100 pt-8">
+        <div class="mt-8 text-center border-t border-gray-100 pt-8 space-y-3">
+          <p v-if="role === 'masyarakat'" class="text-[13px] font-medium text-gray-500">
+            Belum punya akun? 
+            <router-link to="/register" class="font-bold text-orange-600 hover:text-red-600 transition-colors">Daftar Sekarang</router-link>
+          </p>
           <p class="text-[13px] font-medium text-gray-500">
-            Bukan petugas? 
-            <router-link to="/landing" class="font-bold text-orange-600 hover:text-red-600 transition-colors">Kembali ke Beranda</router-link>
+            Kembali ke 
+            <router-link to="/landing" class="font-bold text-orange-600 hover:text-red-600 transition-colors">Beranda Publik</router-link>
           </p>
         </div>
       </div>
