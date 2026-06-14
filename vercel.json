@@ -1,7 +1,6 @@
 {
   "buildCommand": "echo 'Static HTML ready'",
   "outputDirectory": ".",
-  "framework": "static",
   "trailingSlash": false,
   "headers": [
     {
