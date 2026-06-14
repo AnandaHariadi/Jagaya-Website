@@ -24,7 +24,6 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarEleme
 /* ── LIVE CLOCK ─────────────────────────────────────────── */
 const now = ref(new Date())
 let ticker = null
-onMounted(() => { ticker = setInterval(() => now.value = new Date(), 1000) })
 onUnmounted(() => clearInterval(ticker))
 const timeStr = computed(() => now.value.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }))
 const dateStr = computed(() => now.value.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }))
@@ -163,14 +162,18 @@ const sideMetrics = [
 ]
 
 /* ── TABLE DATA ──────────────────────────────────────────── */
-const poskoData = ref([
-  { id: 1, nama: 'Posko Karanganyar', lokasi: 'Kec. Karanganyar', kapasitas: 500, pengungsi: 487, status: 'Kritis', koordinator: 'Budi Santoso', kontak: '0812-3456-789', lastUpdate: '10 menit lalu' },
-  { id: 2, nama: 'Posko Sayung Utara', lokasi: 'Kec. Sayung', kapasitas: 300, pengungsi: 215, status: 'Siaga', koordinator: 'Siti Rahayu', kontak: '0898-7654-321', lastUpdate: '25 menit lalu' },
-  { id: 3, nama: 'Posko Demak Kota', lokasi: 'Kec. Demak', kapasitas: 400, pengungsi: 180, status: 'Normal', koordinator: 'Ahmad Fauzi', kontak: '0856-1234-567', lastUpdate: '5 menit lalu' },
-  { id: 4, nama: 'Posko Bonang', lokasi: 'Kec. Bonang', kapasitas: 250, pengungsi: 240, status: 'Kritis', koordinator: 'Dewi Lestari', kontak: '0878-9012-345', lastUpdate: '2 menit lalu' },
-  { id: 5, nama: 'Posko Mijen Selatan', lokasi: 'Kec. Mijen', kapasitas: 350, pengungsi: 122, status: 'Normal', koordinator: 'Rudi Hartono', kontak: '0813-5678-901', lastUpdate: '45 menit lalu' },
-  { id: 6, nama: 'Posko Wedung', lokasi: 'Kec. Wedung', kapasitas: 280, pengungsi: 265, status: 'Siaga', koordinator: 'Nur Hidayah', kontak: '0857-2345-678', lastUpdate: '15 menit lalu' },
-])
+const poskoData = ref([])
+
+import { poskoService } from '../services/poskoService'
+
+onMounted(async () => {
+  ticker = setInterval(() => now.value = new Date(), 1000)
+  try {
+    poskoData.value = await poskoService.getAll()
+  } catch (err) {
+    console.error('Failed to load dashboard posko data:', err)
+  }
+})
 
 const searchQuery = ref('')
 const statusFilter = ref('Semua')
@@ -496,21 +499,21 @@ const notifCount = computed(() => activities.length)
                       </div>
                     </div>
                   </td>
-                  <td class="cell-text">{{ p.lokasi }}</td>
-                  <td class="cell-text">{{ p.koordinator }}</td>
+                  <td class="cell-text">Koordinat: {{ p.lat }}, {{ p.lng }}</td>
+                  <td class="cell-text">-</td>
                   <td class="cell-text">{{ p.kapasitas }}</td>
                   <td>
                     <div class="capacity-cell">
-                      <span class="capacity-num">{{ p.pengungsi }}</span>
+                      <span class="capacity-num">{{ p.terisi }}</span>
                       <div class="capacity-bar">
                         <div
                           class="capacity-fill"
                           :class="{
-                            'fill-danger': (p.pengungsi / p.kapasitas) > 0.9,
-                            'fill-warning': (p.pengungsi / p.kapasitas) > 0.7 && (p.pengungsi / p.kapasitas) <= 0.9,
-                            'fill-ok': (p.pengungsi / p.kapasitas) <= 0.7,
+                            'fill-danger': (p.terisi / p.kapasitas) > 0.9,
+                            'fill-warning': (p.terisi / p.kapasitas) > 0.7 && (p.terisi / p.kapasitas) <= 0.9,
+                            'fill-ok': (p.terisi / p.kapasitas) <= 0.7,
                           }"
-                          :style="{ width: Math.min((p.pengungsi / p.kapasitas) * 100, 100) + '%' }"
+                          :style="{ width: Math.min((p.terisi / p.kapasitas) * 100, 100) + '%' }"
                         ></div>
                       </div>
                     </div>

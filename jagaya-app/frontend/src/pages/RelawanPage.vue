@@ -2,18 +2,23 @@
 import { ref, computed } from 'vue'
 import { PlusIcon, MagnifyingGlassIcon, BriefcaseIcon, MapPinIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import DashboardLayout from '../components/DashboardLayout.vue'
+import { relawanService } from '../services/relawanService'
+import { onMounted } from 'vue'
 
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js'
 import { Doughnut, Bar } from 'vue-chartjs'
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title)
 
-const relawans = ref([
-  { id: 1, nama: 'Budi Santoso', spesialisasi: 'Medis Darurat', lokasi: 'Posko Karanganyar', status: 'Aktif' },
-  { id: 2, nama: 'Siti Aminah', spesialisasi: 'Dapur Umum', lokasi: 'Posko Sayung', status: 'Aktif' },
-  { id: 3, nama: 'Ahmad Fauzi', spesialisasi: 'Evakuasi (SAR)', lokasi: 'Posko Demak Kota', status: 'Standby' },
-  { id: 4, nama: 'Rina Melati', spesialisasi: 'Trauma Healing', lokasi: 'Posko Bonang', status: 'Aktif' },
-])
+const relawans = ref([])
+
+onMounted(async () => {
+  try {
+    relawans.value = await relawanService.getAll()
+  } catch (err) {
+    console.error('Failed to load relawan data:', err)
+  }
+})
 
 /* ── Search ── */
 const search = ref('')
@@ -30,16 +35,21 @@ const showModal = ref(false)
 const form = ref({ nama: '', spesialisasi: 'Medis Darurat', lokasi: '', status: 'Aktif' })
 const spesialisasiOptions = ['Medis Darurat', 'Dapur Umum', 'Evakuasi (SAR)', 'Trauma Healing', 'Logistik']
 const openModal = () => { form.value = { nama: '', spesialisasi: 'Medis Darurat', lokasi: '', status: 'Aktif' }; showModal.value = true }
-const addRelawan = () => {
+const addRelawan = async () => {
   if (!form.value.nama.trim()) return
-  relawans.value.unshift({
-    id: Date.now(),
-    nama: form.value.nama.trim(),
-    spesialisasi: form.value.spesialisasi,
-    lokasi: form.value.lokasi.trim() || 'Belum ditugaskan',
-    status: form.value.status,
-  })
-  showModal.value = false
+  
+  try {
+    const newRelawan = await relawanService.create({
+      nama: form.value.nama.trim(),
+      spesialisasi: form.value.spesialisasi,
+      lokasi: form.value.lokasi.trim() || 'Belum ditugaskan',
+      status: form.value.status,
+    })
+    relawans.value.unshift(newRelawan)
+    showModal.value = false
+  } catch (err) {
+    alert('Gagal menambah relawan: ' + (err.response?.data?.error || err.message))
+  }
 }
 
 // Analytics Data

@@ -1,11 +1,11 @@
 import { ref } from 'vue'
+import { authService } from '../services/authService'
 
 // Shared across all dashboard-shell pages so sidebar collapse state persists.
 export const sidebarOpen = ref(true)
 
 export function handleLogout() {
-  localStorage.removeItem('isAuthenticated')
-  window.location.href = '/login'
+  authService.logout()
 }
 
 // Tiny helper: trigger a browser download of CSV text.

@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { authService } from '../services/authService'
 import logoImg from '../assets/logo-jagaya.png'
 
 const router = useRouter()
@@ -13,7 +14,7 @@ const form = ref({
 const isLoading = ref(false)
 const errorMsg = ref('')
 
-const handleRegister = () => {
+const handleRegister = async () => {
   if (form.value.password !== form.value.confirmPassword) {
     errorMsg.value = 'Kata sandi tidak cocok!'
     return
@@ -22,14 +23,14 @@ const handleRegister = () => {
   isLoading.value = true
   errorMsg.value = ''
   
-  // Mock registration delay
-  setTimeout(() => {
-    // Automatically log in as 'masyarakat' after registration
-    localStorage.setItem('isAuthenticated', 'true')
-    localStorage.setItem('userRole', 'masyarakat')
+  try {
+    await authService.register(form.value.nama, form.value.email, form.value.password)
     router.push('/public-dashboard')
+  } catch (err) {
+    errorMsg.value = err.response?.data?.error || 'Gagal mendaftar. Silakan coba lagi.'
+  } finally {
     isLoading.value = false
-  }, 1000)
+  }
 }
 </script>
 

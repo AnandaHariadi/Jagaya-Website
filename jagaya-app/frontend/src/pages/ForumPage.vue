@@ -6,67 +6,72 @@ import {
 } from '@heroicons/vue/24/outline'
 import { HandThumbUpIcon as ThumbSolid } from '@heroicons/vue/24/solid'
 
-const STORAGE_KEY = 'jagaya_forum_aspirasi'
-const LIKED_KEY = 'jagaya_forum_liked'
+import { forumService } from '../services/forumService'
+import { authService } from '../services/authService'
 
 const categories = ['Infrastruktur', 'Logistik', 'Evakuasi', 'Kesehatan', 'Lainnya']
 
-const seed = [
-  { id: 1, nama: 'Warga Sayung', kategori: 'Infrastruktur', isi: 'Tanggul di RT 03 Sayung masih bocor, mohon segera diperbaiki sebelum rob besar pekan depan.', waktu: '2 jam lalu', likes: 24 },
-  { id: 2, nama: 'Relawan Karanganyar', kategori: 'Logistik', isi: 'Stok air bersih di Posko Karanganyar menipis. Butuh tambahan minimal 200 galon.', waktu: '5 jam lalu', likes: 41 },
-  { id: 3, nama: 'Ibu Sri', kategori: 'Kesehatan', isi: 'Banyak lansia di posko Bonang butuh pemeriksaan tensi dan obat rutin. Adakah tim medis yang bisa datang?', waktu: '1 hari lalu', likes: 18 },
-]
-
 const posts = ref([])
-const liked = ref([])
+const liked = ref([]) // IDs of posts liked in this session
 
-const loadPosts = () => {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (raw) {
-    try { posts.value = JSON.parse(raw) } catch { posts.value = [...seed] }
-  } else {
-    posts.value = [...seed]
-    save()
+const loadPosts = async () => {
+  try {
+    posts.value = await forumService.getAll()
+  } catch (err) {
+    console.error('Failed to load forum posts:', err)
   }
-  const rawLiked = localStorage.getItem(LIKED_KEY)
-  if (rawLiked) { try { liked.value = JSON.parse(rawLiked) } catch { liked.value = [] } }
 }
-const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(posts.value))
-const saveLiked = () => localStorage.setItem(LIKED_KEY, JSON.stringify(liked.value))
 
 onMounted(loadPosts)
 
 /* ── FORM ── */
-const form = ref({ nama: '', kategori: 'Infrastruktur', isi: '' })
+const form = ref({ nama: authService.getUserName() || '', kategori: 'Infrastruktur', isi: '' })
 const submitted = ref(false)
-const submitAspirasi = () => {
+const submitAspirasi = async () => {
   if (!form.value.isi.trim()) return
-  posts.value.unshift({
-    id: Date.now(),
-    nama: form.value.nama.trim() || 'Warga Anonim',
-    kategori: form.value.kategori,
-    isi: form.value.isi.trim(),
-    waktu: 'Baru saja',
-    likes: 0,
-  })
-  save()
-  form.value.isi = ''
-  form.value.nama = ''
-  submitted.value = true
-  setTimeout(() => submitted.value = false, 2500)
+  
+  try {
+    const newPost = await forumService.create({
+      nama: form.value.nama.trim(),
+      kategori: form.value.kategori,
+      isi: form.value.isi.trim()
+    })
+    posts.value.unshift(newPost)
+    form.value.isi = ''
+    submitted.value = true
+    setTimeout(() => submitted.value = false, 2500)
+  } catch (err) {
+    alert('Gagal mengirim aspirasi: ' + (err.response?.data?.error || err.message))
+  }
 }
 
 /* ── LIKE ── */
 const isLiked = (id) => liked.value.includes(id)
-const toggleLike = (post) => {
-  if (isLiked(post.id)) {
+const toggleLike = async (post) => {
+  // Optimistic UI update
+  const initiallyLiked = isLiked(post.id)
+  if (initiallyLiked) {
     post.likes--
     liked.value = liked.value.filter(i => i !== post.id)
   } else {
     post.likes++
     liked.value.push(post.id)
   }
-  save(); saveLiked()
+  
+  try {
+    const res = await forumService.toggleLike(post.id)
+    post.likes = res.likes // sync with server truth
+  } catch (err) {
+    // Revert optimistic update
+    if (initiallyLiked) {
+      post.likes++
+      liked.value.push(post.id)
+    } else {
+      post.likes--
+      liked.value = liked.value.filter(i => i !== post.id)
+    }
+    console.error('Failed to toggle like:', err)
+  }
 }
 
 /* ── FILTER + SEARCH ── */

@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { authService } from '../services/authService'
 import { ShieldCheckIcon } from '@heroicons/vue/24/solid'
 import logoImg from '../assets/logo-jagaya.png'
 import fotoImg from '../assets/foto.png'
@@ -11,23 +12,28 @@ const email = ref('')
 const password = ref('')
 const isLoading = ref(false)
 const role = ref('petugas') // Default role
+const errorMsg = ref('')
 
-const handleLogin = () => {
+const handleLogin = async () => {
+  if (!email.value || !password.value) return
+  
   isLoading.value = true
-  // Mock login delay
-  setTimeout(() => {
-    localStorage.setItem('isAuthenticated', 'true')
-    localStorage.setItem('userRole', role.value)
-
+  errorMsg.value = ''
+  
+  try {
+    await authService.login(email.value, password.value, role.value)
+    
     if (role.value === 'masyarakat') {
       router.push('/public-dashboard')
     } else {
       const redirect = route.query.redirect
       router.push(redirect ? String(redirect) : '/dashboard')
     }
-
+  } catch (err) {
+    errorMsg.value = err.response?.data?.error || 'Gagal login. Silakan periksa koneksi dan kredensial Anda.'
+  } finally {
     isLoading.value = false
-  }, 1000)
+  }
 }
 </script>
 
@@ -105,6 +111,10 @@ const handleLogin = () => {
           <div class="flex p-1 bg-gray-100 rounded-xl mb-6">
             <button type="button" @click="role = 'petugas'" :class="role === 'petugas' ? 'bg-white shadow text-orange-600' : 'text-gray-500 hover:text-gray-700'" class="flex-1 py-2 text-sm font-bold rounded-lg transition-all">Petugas</button>
             <button type="button" @click="role = 'masyarakat'" :class="role === 'masyarakat' ? 'bg-white shadow text-orange-600' : 'text-gray-500 hover:text-gray-700'" class="flex-1 py-2 text-sm font-bold rounded-lg transition-all">Masyarakat</button>
+          </div>
+
+          <div v-if="errorMsg" class="bg-red-50 text-red-600 border border-red-200 px-4 py-3 rounded-xl text-sm font-bold text-center">
+            {{ errorMsg }}
           </div>
 
           <div>

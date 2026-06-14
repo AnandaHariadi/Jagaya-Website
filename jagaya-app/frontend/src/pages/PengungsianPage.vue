@@ -8,6 +8,7 @@ import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet'
 import L from 'leaflet'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import { downloadCSV } from '../composables/dashboardState'
+import { poskoService } from '../services/poskoService'
 
 // Fix for default Leaflet icon in Vue
 delete L.Icon.Default.prototype._getIconUrl
@@ -25,12 +26,17 @@ const center = ref([-6.8953, 110.6386]) // Demak center roughly
 const mapOptions = { zoomControl: false }
 
 // Data Posko with Coordinates
-const poskoData = ref([
-  { id: 1, nama: 'Posko Utama Karanganyar', lat: -6.885, lng: 110.640, kapasitas: 1500, terisi: 1420, status: 'Kritis', tren: '+12%' },
-  { id: 2, nama: 'Posko Desa Sayung', lat: -6.901, lng: 110.612, kapasitas: 800, terisi: 650, status: 'Waspada', tren: '+5%' },
-  { id: 3, nama: 'Posko Balai Desa Mijen', lat: -6.872, lng: 110.655, kapasitas: 1000, terisi: 400, status: 'Aman', tren: '-2%' },
-  { id: 4, nama: 'Posko Darurat Gajah', lat: -6.860, lng: 110.680, kapasitas: 500, terisi: 480, status: 'Kritis', tren: '+18%' },
-])
+const poskoData = ref([])
+
+import { onMounted } from 'vue'
+
+onMounted(async () => {
+  try {
+    poskoData.value = await poskoService.getAll()
+  } catch (err) {
+    console.error('Failed to load posko data:', err)
+  }
+})
 
 // Analytics Chart Data
 const trendData = {

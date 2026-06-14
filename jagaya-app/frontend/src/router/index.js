@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { authService } from '../services/authService'
 
 const routes = [
   {
@@ -98,17 +99,10 @@ const router = createRouter({
 })
 
 // Navigation Guard
-function isAuthenticated() {
-  return localStorage.getItem('isAuthenticated') === 'true'
-}
-
-function getUserRole() {
-  return localStorage.getItem('userRole') || 'petugas'
-}
 
 router.beforeEach((to, from, next) => {
-  const authed = isAuthenticated()
-  const role = getUserRole()
+  const authed = authService.isAuthenticated()
+  const role = authService.getUserRole()
 
   // protect any route with meta.requiresAuth
   if (to.meta.requiresAuth && !authed) {

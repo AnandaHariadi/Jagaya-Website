@@ -2,6 +2,8 @@
 import { CurrencyDollarIcon, ArrowTrendingUpIcon, ShieldCheckIcon, DocumentCheckIcon } from '@heroicons/vue/24/outline'
 import DashboardLayout from '../components/DashboardLayout.vue'
 import { downloadCSV } from '../composables/dashboardState'
+import { donasiService } from '../services/donasiService'
+import { ref, onMounted } from 'vue'
 
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js'
 import { Line } from 'vue-chartjs'
@@ -33,15 +35,19 @@ const allocations = [
   { kategori: 'Operasional Relawan', persentase: 10, nominal: 'Rp 24.50 M' }
 ]
 
-const recentDonations = [
-  { id: 'TRX-9982', nama: 'Hamba Allah', nominal: 'Rp 5.000.000', waktu: '10 menit lalu', verifikasi: true },
-  { id: 'TRX-9981', nama: 'PT Makmur Jaya', nominal: 'Rp 150.000.000', waktu: '1 jam lalu', verifikasi: true },
-  { id: 'TRX-9980', nama: 'Komunitas Peduli Demak', nominal: 'Rp 12.500.000', waktu: '3 jam lalu', verifikasi: true },
-]
+const recentDonations = ref([])
+
+onMounted(async () => {
+  try {
+    recentDonations.value = await donasiService.getAll()
+  } catch (err) {
+    console.error('Failed to load donasi data:', err)
+  }
+})
 
 const exportLedger = () => {
   const rows = [['ID Transaksi', 'Donatur', 'Nominal', 'Waktu', 'Terverifikasi']]
-  recentDonations.forEach(d => rows.push([d.id, d.nama, d.nominal, d.waktu, d.verifikasi ? 'Ya' : 'Tidak']))
+  recentDonations.value.forEach(d => rows.push([d.id_transaksi, d.nama_donatur, d.nominal, d.waktu, d.terverifikasi ? 'Ya' : 'Tidak']))
   downloadCSV('audit-donasi-jagaya.csv', rows)
 }
 </script>
@@ -137,12 +143,12 @@ const exportLedger = () => {
           </thead>
           <tbody class="divide-y divide-gray-100">
             <tr v-for="d in recentDonations" :key="d.id" class="hover:bg-gray-50 transition-colors">
-              <td class="px-4 py-4 text-xs font-mono text-gray-500">{{ d.id }}</td>
-              <td class="px-4 py-4 text-sm font-bold text-gray-900">{{ d.nama }}</td>
+              <td class="px-4 py-4 text-xs font-mono text-gray-500">{{ d.id_transaksi }}</td>
+              <td class="px-4 py-4 text-sm font-bold text-gray-900">{{ d.nama_donatur }}</td>
               <td class="px-4 py-4 text-sm font-black text-green-600 text-right">+ {{ d.nominal }}</td>
               <td class="px-4 py-4 text-xs text-gray-500">{{ d.waktu }}</td>
               <td class="px-4 py-4 text-center">
-                <ShieldCheckIcon class="w-5 h-5 text-blue-500 mx-auto" />
+                <ShieldCheckIcon v-if="d.terverifikasi" class="w-5 h-5 text-blue-500 mx-auto" />
               </td>
             </tr>
           </tbody>

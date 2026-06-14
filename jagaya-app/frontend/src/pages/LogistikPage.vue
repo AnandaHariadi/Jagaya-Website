@@ -4,53 +4,68 @@ import { TruckIcon, ArchiveBoxIcon, ExclamationCircleIcon, ArrowPathIcon, XMarkI
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
 import { Bar } from 'vue-chartjs'
 import DashboardLayout from '../components/DashboardLayout.vue'
+import { logistikService } from '../services/logistikService'
+import { onMounted } from 'vue'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 // Analytics Data
-const inventoryData = {
-  labels: ['Beras', 'Mie Instan', 'Air Mineral', 'Pakaian Dewasa', 'Susu Bayi', 'Obat-obatan'],
-  datasets: [
-    {
-      label: 'Stok Saat Ini (Karton/Karung)',
-      data: [1200, 3500, 4000, 800, 150, 450],
-      backgroundColor: '#f97316',
-      borderRadius: 4
-    },
-    {
-      label: 'Batas Kritis',
-      data: [500, 1000, 1500, 300, 200, 300], // Susu Bayi is below critical
-      backgroundColor: '#ef4444',
-      borderRadius: 4
-    }
-  ]
-}
+const inventoryData = ref({
+  labels: [],
+  datasets: []
+})
 const chartOpts = {
   responsive: true, maintainAspectRatio: false,
   plugins: { legend: { position: 'top' } }
 }
 
-const deliveries = ref([
-  { id: 'DEL-001', tujuan: 'Posko Karanganyar', barang: '500 Porsi Makanan Siap Saji', status: 'Dalam Perjalanan', waktu: 'ETA: 15 Menit' },
-  { id: 'DEL-002', tujuan: 'Posko Sayung', barang: '200 Selimut & 50 Matras', status: 'Loading', waktu: 'ETA: 45 Menit' },
-  { id: 'DEL-003', tujuan: 'Balai Desa Mijen', barang: '15 Dus Obat Medis Dasar', status: 'Selesai', waktu: 'Terkirim Pukul 08:00' },
-])
+const deliveries = ref([])
+
+onMounted(async () => {
+  try {
+    const inv = await logistikService.getInventaris()
+    inventoryData.value = {
+      labels: inv.map(i => i.nama_barang),
+      datasets: [
+        {
+          label: 'Stok Saat Ini',
+          data: inv.map(i => i.stok_saat_ini),
+          backgroundColor: '#f97316',
+          borderRadius: 4
+        },
+        {
+          label: 'Batas Kritis',
+          data: inv.map(i => i.batas_kritis),
+          backgroundColor: '#ef4444',
+          borderRadius: 4
+        }
+      ]
+    }
+    
+    deliveries.value = await logistikService.getDistribusi()
+  } catch (err) {
+    console.error('Failed to load logistik data:', err)
+  }
+})
 
 /* ── Input Barang Masuk modal ── */
 const showModal = ref(false)
 const form = ref({ tujuan: '', barang: '', status: 'Loading' })
 const openModal = () => { form.value = { tujuan: '', barang: '', status: 'Loading' }; showModal.value = true }
-const addDelivery = () => {
+const addDelivery = async () => {
   if (!form.value.tujuan.trim() || !form.value.barang.trim()) return
-  const num = String(deliveries.value.length + 1).padStart(3, '0')
-  deliveries.value.unshift({
-    id: 'DEL-' + num,
-    tujuan: form.value.tujuan.trim(),
-    barang: form.value.barang.trim(),
-    status: form.value.status,
-    waktu: form.value.status === 'Selesai' ? 'Baru dicatat' : 'ETA: Menunggu',
-  })
-  showModal.value = false
+  
+  try {
+    const newDeliv = await logistikService.createDistribusi({
+      tujuan: form.value.tujuan.trim(),
+      barang: form.value.barang.trim(),
+      status: form.value.status
+    })
+    deliveries.value.unshift(newDeliv)
+    showModal.value = false
+  } catch (err) {
+    alert('Gagal mencatat distribusi: ' + (err.response?.data?.error || err.message))
+  }
 }
 </script>
 
@@ -118,7 +133,7 @@ const addDelivery = () => {
           <div class="space-y-4">
             <div v-for="d in deliveries" :key="d.id" class="p-4 rounded-xl border border-gray-100">
               <div class="flex justify-between items-start mb-2">
-                <span class="text-[10px] font-mono font-bold bg-gray-100 px-2 py-0.5 rounded">{{ d.id }}</span>
+                <span class="text-[10px] font-mono font-bold bg-gray-100 px-2 py-0.5 rounded">{{ d.id_distribusi }}</span>
                 <span :class="d.status === 'Selesai' ? 'text-green-600' : d.status === 'Loading' ? 'text-orange-600' : 'text-blue-600'" class="text-[10px] font-bold uppercase">{{ d.status }}</span>
               </div>
               <p class="font-bold text-gray-900 text-sm">{{ d.tujuan }}</p>
