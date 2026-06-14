@@ -1,13 +1,10 @@
 {
-  "buildCommand": "echo 'Static HTML ready'",
-  "outputDirectory": ".",
-  "trailingSlash": false,
-  "headers": [
+  "buildCommand": "cd jagaya-app/frontend && npm install && npm run build",
+  "outputDirectory": "jagaya-app/frontend/dist",
+  "rewrites": [
     {
       "source": "/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
-      ]
+      "destination": "/index.html"
     }
   ]
 }
