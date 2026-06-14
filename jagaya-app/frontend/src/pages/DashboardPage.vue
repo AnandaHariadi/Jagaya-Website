@@ -1457,7 +1457,7 @@ const notifCount = computed(() => activities.length)
   .stat-cards-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 1024px) {
-  .main-content { margin-left: 0 !important; }
+  .main-content, .main-content.collapsed { margin-left: 0 !important; }
   .dashboard-grid { grid-template-columns: 1fr; }
   .dashboard-grid-2 { grid-template-columns: 1fr; }
   .header-search { display: none; }
@@ -1465,8 +1465,88 @@ const notifCount = computed(() => activities.length)
 @media (max-width: 768px) {
   .stat-cards-grid { grid-template-columns: 1fr; }
   .content-area { padding: 16px; }
-  .top-header { padding: 14px 16px; }
-  .promo-banner { flex-direction: column; gap: 14px; text-align: center; }
+  .top-header {
+    padding: 14px 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-left {
+    width: 100%;
+  }
+  .header-right {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .page-title {
+    font-size: 18px;
+  }
+  .promo-banner {
+    flex-direction: column;
+    gap: 14px;
+    text-align: center;
+    padding: 14px 16px;
+  }
   .banner-content { flex-direction: column; }
+  .banner-title { font-size: 13px; }
+  .banner-sub { font-size: 11px; }
+
+  /* Notification dropdown */
+  .notif-dropdown {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-radius: 14px 14px 0 0;
+    max-height: 60vh;
+  }
+
+  /* Table responsive */
+  .table-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .table-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .table-search-input { width: 120px; }
+  .table-footer {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  /* View site / logout buttons */
+  .view-site-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  /* Donut body stack */
+  .donut-body {
+    flex-direction: column;
+    align-items: center;
+  }
+  .donut-wrap {
+    width: 150px;
+    height: 150px;
+  }
+}
+@media (max-width: 480px) {
+  .page-title { font-size: 16px; }
+  .stat-value { font-size: 16px; }
+  .stat-label { font-size: 10px; }
+  .chart-big-number { font-size: 24px; }
+  .metric-value { font-size: 18px; }
+  .content-area { padding: 12px; }
+  .data-table td,
+  .data-table th {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
 }
 </style>

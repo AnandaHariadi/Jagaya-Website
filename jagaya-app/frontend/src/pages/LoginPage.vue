@@ -30,7 +30,11 @@ const handleLogin = async () => {
       router.push(redirect ? String(redirect) : '/dashboard')
     }
   } catch (err) {
-    errorMsg.value = err.response?.data?.error || 'Gagal login. Silakan periksa koneksi dan kredensial Anda.'
+    if (err.message && err.message.includes('Server tidak tersedia')) {
+      errorMsg.value = err.message
+    } else {
+      errorMsg.value = err.response?.data?.error || 'Gagal login. Pastikan email, password, dan role sudah sesuai. Gunakan akun demo untuk mencoba.'
+    }
   } finally {
     isLoading.value = false
   }

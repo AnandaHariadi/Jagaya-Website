@@ -118,10 +118,14 @@ const menuItems = [
     display: flex;
     position: fixed; bottom: 20px; right: 20px;
     width: 50px; height: 50px; border-radius: 25px;
-    background: #ea580c; color: #fff; border: none;
+    background: linear-gradient(135deg, #ea580c, #dc2626); color: #fff; border: none;
     align-items: center; justify-content: center;
-    z-index: 110; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
+    z-index: 110; box-shadow: 0 4px 16px rgba(234, 88, 12, 0.4);
     cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .mobile-floating-toggle:active {
+    transform: scale(0.92);
   }
   .ds-sidebar {
     transform: translateX(-100%);
@@ -137,6 +141,12 @@ const menuItems = [
   }
   .mobile-overlay.overlay-visible {
     opacity: 1; pointer-events: auto;
+  }
+}
+@media (max-width: 480px) {
+  .mobile-floating-toggle {
+    bottom: 16px; right: 16px;
+    width: 46px; height: 46px;
   }
 }
 

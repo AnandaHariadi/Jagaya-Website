@@ -39,6 +39,11 @@ export const authService = {
 
       return res.data
     } catch (error) {
+      // Provide clearer error messages
+      if (!error.response) {
+        // Network error — no backend available
+        throw new Error('Server tidak tersedia. Gunakan akun demo untuk mencoba sistem.')
+      }
       throw error
     }
   },
@@ -90,5 +95,14 @@ export const authService = {
       localStorage.setItem('forumSessionId', sid)
     }
     return sid
+  },
+
+  /**
+   * Check if the app is running in demo mode (no real backend).
+   * Returns true when the stored auth token is a demo token.
+   */
+  isDemoMode() {
+    const token = localStorage.getItem('authToken')
+    return token && token.startsWith('demo-token')
   }
 }

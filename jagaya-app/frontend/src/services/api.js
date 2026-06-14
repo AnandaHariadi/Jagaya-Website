@@ -20,11 +20,12 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Response interceptor: handle 401
+// Response interceptor: handle 401 (only from real server responses)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only handle 401 from actual server responses, NOT network errors
+    if (error.response && error.response.status === 401) {
       // Token expired or invalid - clear auth and redirect
       localStorage.removeItem('authToken')
       localStorage.removeItem('isAuthenticated')
