@@ -23,7 +23,17 @@ const menuItems = [
 </script>
 
 <template>
-  <aside class="ds-sidebar" :class="{ collapsed: !sidebarOpen }">
+  <div>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay lg:hidden" :class="{ 'overlay-visible': sidebarOpen }" @click="sidebarOpen = false"></div>
+    
+    <!-- Mobile Floating Toggle -->
+    <button class="mobile-floating-toggle lg:hidden" @click="sidebarOpen = !sidebarOpen">
+      <Bars3Icon v-if="!sidebarOpen" class="w-6 h-6" />
+      <XMarkIcon v-else class="w-6 h-6" />
+    </button>
+
+    <aside class="ds-sidebar" :class="{ collapsed: !sidebarOpen, 'mobile-open': sidebarOpen }">
     <div class="ds-header">
       <div class="ds-logo">
         <div class="ds-logo-icon"><img :src="logoImg" alt="JAGAYA" class="w-7 h-7 object-contain" /></div>
@@ -74,6 +84,7 @@ const menuItems = [
       </button>
     </div>
   </aside>
+  </div>
 </template>
 
 <style scoped>
@@ -89,10 +100,45 @@ const menuItems = [
   position: fixed;
   top: 0; left: 0; bottom: 0;
   z-index: 100;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
 .ds-sidebar.collapsed { width: 72px; }
+
+/* Mobile Floating Toggle */
+.mobile-floating-toggle {
+  display: none;
+}
+.mobile-overlay {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .mobile-floating-toggle {
+    display: flex;
+    position: fixed; bottom: 20px; right: 20px;
+    width: 50px; height: 50px; border-radius: 25px;
+    background: #ea580c; color: #fff; border: none;
+    align-items: center; justify-content: center;
+    z-index: 110; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
+    cursor: pointer;
+  }
+  .ds-sidebar {
+    transform: translateX(-100%);
+    width: 260px !important;
+  }
+  .ds-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  .mobile-overlay {
+    display: block; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 90;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .mobile-overlay.overlay-visible {
+    opacity: 1; pointer-events: auto;
+  }
+}
 
 .ds-header {
   display: flex; align-items: center; justify-content: space-between;

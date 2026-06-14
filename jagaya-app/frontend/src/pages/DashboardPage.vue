@@ -1457,7 +1457,6 @@ const notifCount = computed(() => activities.length)
   .stat-cards-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 1024px) {
-  .sidebar { display: none; }
   .main-content { margin-left: 0 !important; }
   .dashboard-grid { grid-template-columns: 1fr; }
   .dashboard-grid-2 { grid-template-columns: 1fr; }

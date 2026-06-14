@@ -20,7 +20,7 @@ import { sidebarOpen } from '../composables/dashboardState'
   min-height: 100vh;
 }
 .dl-main.collapsed { margin-left: 72px; }
-@media (max-width: 768px) {
-  .dl-main, .dl-main.collapsed { margin-left: 72px; }
+@media (max-width: 1024px) {
+  .dl-main, .dl-main.collapsed { margin-left: 0 !important; }
 }
 </style>
