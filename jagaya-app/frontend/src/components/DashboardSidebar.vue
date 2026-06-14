@@ -5,9 +5,10 @@ import {
   DocumentTextIcon, Cog6ToothIcon, ChevronDownIcon,
   Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon, ChatBubbleLeftRightIcon
 } from '@heroicons/vue/24/outline'
-import { ShieldCheckIcon as ShieldSolid } from '@heroicons/vue/24/solid'
+import { ShieldCheckIcon as ShieldSolid, UserCircleIcon } from '@heroicons/vue/24/solid'
 import { sidebarOpen, handleLogout } from '../composables/dashboardState'
 import logoImg from '../assets/logo-jagaya.png'
+import { watch } from 'vue'
 
 const route = useRoute()
 
@@ -20,18 +21,20 @@ const menuItems = [
   { name: 'Laporan', icon: DocumentTextIcon, path: '/laporan' },
   { name: 'Forum Aspirasi', icon: ChatBubbleLeftRightIcon, path: '/forum' },
 ]
+
+// Auto-close sidebar on mobile when navigating
+watch(() => route.path, () => {
+  if (window.innerWidth <= 1024) {
+    sidebarOpen.value = false
+  }
+})
 </script>
 
 <template>
   <div>
     <!-- Mobile Overlay -->
     <div class="mobile-overlay lg:hidden" :class="{ 'overlay-visible': sidebarOpen }" @click="sidebarOpen = false"></div>
-    
-    <!-- Mobile Floating Toggle -->
-    <button class="mobile-floating-toggle lg:hidden" @click="sidebarOpen = !sidebarOpen">
-      <Bars3Icon v-if="!sidebarOpen" class="w-6 h-6" />
-      <XMarkIcon v-else class="w-6 h-6" />
-    </button>
+
 
     <aside class="ds-sidebar" :class="{ collapsed: !sidebarOpen, 'mobile-open': sidebarOpen }">
     <div class="ds-header">
@@ -48,8 +51,8 @@ const menuItems = [
     </div>
 
     <div class="ds-user" v-if="sidebarOpen">
-      <div class="ds-avatar">
-        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&q=80" alt="Admin" />
+      <div class="ds-avatar flex items-center justify-center bg-gray-100 rounded-xl" style="width: 38px; height: 38px;">
+        <UserCircleIcon class="w-10 h-10 text-gray-400" />
         <span class="ds-status-dot"></span>
       </div>
       <div class="ds-user-info">
@@ -105,28 +108,7 @@ const menuItems = [
 }
 .ds-sidebar.collapsed { width: 72px; }
 
-/* Mobile Floating Toggle */
-.mobile-floating-toggle {
-  display: none;
-}
-.mobile-overlay {
-  display: none;
-}
-
 @media (max-width: 1024px) {
-  .mobile-floating-toggle {
-    display: flex;
-    position: fixed; bottom: 20px; right: 20px;
-    width: 50px; height: 50px; border-radius: 25px;
-    background: linear-gradient(135deg, #ea580c, #dc2626); color: #fff; border: none;
-    align-items: center; justify-content: center;
-    z-index: 110; box-shadow: 0 4px 16px rgba(234, 88, 12, 0.4);
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-  .mobile-floating-toggle:active {
-    transform: scale(0.92);
-  }
   .ds-sidebar {
     transform: translateX(-100%);
     width: 260px !important;
@@ -141,12 +123,6 @@ const menuItems = [
   }
   .mobile-overlay.overlay-visible {
     opacity: 1; pointer-events: auto;
-  }
-}
-@media (max-width: 480px) {
-  .mobile-floating-toggle {
-    bottom: 16px; right: 16px;
-    width: 46px; height: 46px;
   }
 }
 
