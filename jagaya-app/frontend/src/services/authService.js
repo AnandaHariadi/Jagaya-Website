@@ -5,17 +5,42 @@ import api from './api'
  */
 export const authService = {
   async login(email, password, role) {
-    const res = await api.post('/auth/login', { email, password, role })
-    const { token, user } = res.data
+    // Mock login for demo accounts
+    if (role === 'petugas' && email === 'demo@petugas.com' && password === 'demo123') {
+      const user = { id: 1, nama: 'Admin Posko (Demo)', role: 'petugas', email }
+      localStorage.setItem('authToken', 'demo-token-petugas')
+      localStorage.setItem('isAuthenticated', 'true')
+      localStorage.setItem('userRole', user.role)
+      localStorage.setItem('userName', user.nama)
+      localStorage.setItem('userId', user.id)
+      return { token: 'demo-token-petugas', user }
+    }
+    
+    if (role === 'masyarakat' && email === 'demo@warga.com' && password === 'demo123') {
+      const user = { id: 2, nama: 'Warga Demak (Demo)', role: 'masyarakat', email }
+      localStorage.setItem('authToken', 'demo-token-warga')
+      localStorage.setItem('isAuthenticated', 'true')
+      localStorage.setItem('userRole', user.role)
+      localStorage.setItem('userName', user.nama)
+      localStorage.setItem('userId', user.id)
+      return { token: 'demo-token-warga', user }
+    }
 
-    // Store auth data
-    localStorage.setItem('authToken', token)
-    localStorage.setItem('isAuthenticated', 'true')
-    localStorage.setItem('userRole', user.role)
-    localStorage.setItem('userName', user.nama)
-    localStorage.setItem('userId', user.id)
+    try {
+      const res = await api.post('/auth/login', { email, password, role })
+      const { token, user } = res.data
 
-    return res.data
+      // Store auth data
+      localStorage.setItem('authToken', token)
+      localStorage.setItem('isAuthenticated', 'true')
+      localStorage.setItem('userRole', user.role)
+      localStorage.setItem('userName', user.nama)
+      localStorage.setItem('userId', user.id)
+
+      return res.data
+    } catch (error) {
+      throw error
+    }
   },
 
   async register(nama, email, password) {

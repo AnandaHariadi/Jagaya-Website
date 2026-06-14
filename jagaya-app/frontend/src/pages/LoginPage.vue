@@ -101,9 +101,16 @@ const handleLogin = async () => {
         <!-- Small decorative element -->
         <div class="absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-full blur-2xl opacity-20"></div>
 
-        <div class="text-center mb-10 relative z-10">
+        <div class="text-center mb-8 relative z-10">
           <h2 class="text-3xl font-black text-gray-900 tracking-tight mb-2">Selamat Datang</h2>
-          <p class="text-[15px] font-medium text-gray-500">Silakan masuk menggunakan kredensial Anda.</p>
+          <p class="text-[15px] font-medium text-gray-500 mb-4">Silakan masuk menggunakan kredensial Anda.</p>
+          
+          <div class="p-3 bg-orange-50 rounded-xl text-left border border-orange-100">
+            <p class="text-xs font-bold text-orange-800 mb-1">Akun Demo Petugas:</p>
+            <p class="text-xs text-orange-600 mb-2 font-mono">demo@petugas.com | demo123</p>
+            <p class="text-xs font-bold text-orange-800 mb-1">Akun Demo Masyarakat:</p>
+            <p class="text-xs text-orange-600 font-mono">demo@warga.com | demo123</p>
+          </div>
         </div>
 
         <form class="space-y-6 relative z-10" @submit.prevent="handleLogin">
