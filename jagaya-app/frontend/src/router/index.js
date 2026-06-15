@@ -59,6 +59,11 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/laporan-warga',
+    name: 'LaporanWargaCRUD',
+    component: () => import('../pages/LaporanCrudPage.vue')
+  },
+  {
     path: '/forum',
     name: 'Forum',
     component: () => import('../pages/ForumPage.vue')
