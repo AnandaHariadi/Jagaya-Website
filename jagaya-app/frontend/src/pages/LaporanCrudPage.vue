@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { laporanService } from '../services/laporanService'
+import PublicLayout from '../components/PublicLayout.vue'
 
 // Data
 const laporanList = ref([])
@@ -46,10 +47,15 @@ onUnmounted(() => {
 const fetchLaporan = async () => {
   try {
     const res = await laporanService.getAll(currentPage.value, limit, search.value)
-    laporanList.value = res.data
-    totalPages.value = res.pagination?.total_pages || 1
+    if (res && Array.isArray(res.data)) {
+      laporanList.value = res.data
+      totalPages.value = res.pagination?.total_pages || 1
+    } else {
+      laporanList.value = []
+    }
   } catch (error) {
     console.error('Error fetching data', error)
+    laporanList.value = []
   }
 }
 
@@ -173,8 +179,9 @@ const deleteLaporan = async (id) => {
 </script>
 
 <template>
-  <div class="bg-light min-vh-100 py-5" style="font-family: Arial, sans-serif;">
-    <div class="container">
+  <PublicLayout>
+    <div class="bg-light min-vh-100 py-5" style="font-family: Arial, sans-serif;">
+      <div class="container">
       
       <!-- Deskripsi Aplikasi -->
       <div class="card shadow-sm mb-5 border-0">
@@ -351,7 +358,7 @@ const deleteLaporan = async (id) => {
         </div>
       </div>
     </div>
-  </div>
+  </PublicLayout>
 </template>
 
 <style scoped>
