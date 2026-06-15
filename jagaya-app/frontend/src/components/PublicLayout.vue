@@ -39,6 +39,9 @@ const handleLogout = () => {
               <router-link to="/public-relawan" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors" active-class="!border-orange-500 !text-gray-900">
                 Daftar Relawan
               </router-link>
+              <router-link to="/laporan-warga" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors" active-class="!border-orange-500 !text-gray-900">
+                Laporan Warga
+              </router-link>
             </div>
           </div>
 
@@ -66,6 +69,7 @@ const handleLogout = () => {
           <router-link to="/public-dashboard" @click="isMobileMenuOpen=false" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800" active-class="!bg-orange-50 !border-orange-500 !text-orange-700">Beranda</router-link>
           <router-link to="/public-donasi" @click="isMobileMenuOpen=false" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800" active-class="!bg-orange-50 !border-orange-500 !text-orange-700">Donasi</router-link>
           <router-link to="/public-relawan" @click="isMobileMenuOpen=false" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800" active-class="!bg-orange-50 !border-orange-500 !text-orange-700">Daftar Relawan</router-link>
+          <router-link to="/laporan-warga" @click="isMobileMenuOpen=false" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800" active-class="!bg-orange-50 !border-orange-500 !text-orange-700">Laporan Warga</router-link>
           <button @click="handleLogout" class="block w-full text-left pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-red-600 hover:bg-red-50 hover:border-red-300">Keluar</button>
         </div>
       </div>

@@ -35,6 +35,9 @@ const recentUpdates = ref([
             <router-link to="/public-relawan" class="bg-orange-700/50 backdrop-blur-md text-white border border-white/20 px-6 py-3 rounded-xl font-bold hover:bg-orange-700/70 transition-colors flex items-center gap-2">
               Daftar Relawan
             </router-link>
+            <router-link to="/laporan-warga" class="bg-white/10 backdrop-blur-md text-white border border-white/30 px-6 py-3 rounded-xl font-bold hover:bg-white/20 transition-colors flex items-center gap-2">
+              Lapor Kondisi
+            </router-link>
           </div>
         </div>
       </div>
