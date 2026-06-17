@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
+import logoImg from '../assets/logo-jagaya.png'
 
 const router = useRouter()
 const isMobileMenuOpen = ref(false)
@@ -22,9 +23,7 @@ const handleLogout = () => {
           <!-- Logo & Brand -->
           <div class="flex">
             <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" @click="router.push('/public-dashboard')">
-              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-black text-xs shadow-md">
-                J
-              </div>
+              <img :src="logoImg" alt="JAGAYA" class="h-10 w-auto object-contain" />
               <span class="font-black text-xl tracking-tight text-gray-900 hidden sm:block">JAGAYA <span class="text-orange-500 text-sm font-bold">Publik</span></span>
             </div>
             

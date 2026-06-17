@@ -8,8 +8,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://jagaya-api.test',
+        target: 'http://localhost:8080',
         changeOrigin: true,
+        rewrite: (path) => '/jagaya-api' + path
       }
     }
   }
